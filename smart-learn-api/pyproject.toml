@@ -1,0 +1,24 @@
+[project]
+name = "smart-learn-api"
+version = "0.1.0"
+description = "Smart Learn Avatar API application using FastAPI and ChromaDB"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "chromadb",
+    "pypdf",
+    "python-multipart",
+    "openai",
+    "async-lru",
+    "pandas",
+    "python-dotenv",
+    "httpx",
+    "python-docx",
+    "beautifulsoup4",
+    "pydantic-settings"
+]
+
+[tool.setuptools]
+packages = ["app"]

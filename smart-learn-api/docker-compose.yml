@@ -1,0 +1,16 @@
+services:
+  api:
+    build: .
+    container_name: smart-learn-api
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./chroma_db:/app/chroma_db
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: always
