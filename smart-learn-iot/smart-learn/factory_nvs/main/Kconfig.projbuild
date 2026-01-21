@@ -1,0 +1,102 @@
+menu "Example Configuration"
+
+    config ESP_WIFI_SSID
+        string "WiFi SSID"
+        default "My Network SSID"
+        help
+            SSID (network name) for the example to connect to.
+    config ESP_WIFI_PASSWORD
+        string "WiFi Password"
+        default "My Password"
+        help
+            WiFi password (WPA or WPA2) for the example to use.
+    config OPENAI_API_KEY
+        string "OpenAI Key"
+        default "sk-xxxxxxxx"
+        help
+            OpenAI api key for the example to use.
+    config OPENAI_URL
+        string "Base URL"
+        default "https://api.openai.com/v1/"
+        help
+            Base URL for OpenAI API
+    config KB_URL
+        string "Knowledge Base URL"
+        default "http://18.234.117.250:5000/api/v1/kb/xxxxxxxx/query"
+        help
+            Knowledge Base URL for the application
+
+    choice TTS_VOICE_SELECTION
+        prompt "TTS Voice Selection"
+        default TTS_VOICE_SHIMMER
+        help
+            Select the Text-to-Speech voice for OpenAI TTS.
+            Male voices: alloy, echo, onyx
+            Female voices: fable, nova, shimmer
+
+        config TTS_VOICE_ALLOY
+            bool "alloy (male)"
+        config TTS_VOICE_ECHO
+            bool "echo (male)"
+        config TTS_VOICE_ONYX
+            bool "onyx (male)"
+        config TTS_VOICE_FABLE
+            bool "fable (female)"
+        config TTS_VOICE_NOVA
+            bool "nova (female)"
+        config TTS_VOICE_SHIMMER
+            bool "shimmer (female)"
+    endchoice
+
+    config TTS_VOICE
+        string
+        default "alloy" if TTS_VOICE_ALLOY
+        default "echo" if TTS_VOICE_ECHO
+        default "onyx" if TTS_VOICE_ONYX
+        default "fable" if TTS_VOICE_FABLE
+        default "nova" if TTS_VOICE_NOVA
+        default "shimmer" if TTS_VOICE_SHIMMER
+
+    choice UI_THEME_SELECTION
+        prompt "UI Theme"
+        default UI_THEME_DARK
+        help
+            Select the UI theme for the application.
+
+        config UI_THEME_DARK
+            bool "Dark Theme"
+        config UI_THEME_LIGHT
+            bool "Light Theme"
+        config UI_THEME_CUSTOM
+            bool "Custom Theme"
+    endchoice
+
+    config UI_THEME_TYPE
+        int
+        default 0 if UI_THEME_DARK
+        default 1 if UI_THEME_LIGHT
+        default 2 if UI_THEME_CUSTOM
+
+    config UI_BG_COLOR
+        hex "Background Color (RGB)"
+        default 0x000000 if UI_THEME_DARK
+        default 0xFFFFFF if UI_THEME_LIGHT
+        default 0x1a1a2e if UI_THEME_CUSTOM
+        help
+            Background color in RGB hex format (0xRRGGBB).
+
+    config UI_TEXT_COLOR
+        hex "Text Color (RGB)"
+        default 0xFFFFFF if UI_THEME_DARK
+        default 0x000000 if UI_THEME_LIGHT
+        default 0xFFFFFF if UI_THEME_CUSTOM
+        help
+            Text color in RGB hex format (0xRRGGBB).
+
+    config UI_BUTTON_COLOR
+        hex "Button/Primary Color (RGB)"
+        default 0x04B900
+        help
+            Button and primary color in RGB hex format (0xRRGGBB).
+
+endmenu
