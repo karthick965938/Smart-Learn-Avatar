@@ -3,6 +3,7 @@ from pydantic import BaseModel
 import uuid
 import time
 from async_lru import alru_cache
+import httpx
 
 from app.core.ingestion import extract_text, chunk_text, extract_text_from_url
 from app.core.embedding import get_embeddings, get_embedding
@@ -63,6 +64,20 @@ async def query_knowledge_base(kb_id: str, request: QueryRequest):
     """
     Query the specific knowledge base and get an answer from the LLM.
     """
+    if settings.KB_URL:
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    settings.KB_URL,
+                    json={"query": request.query},
+                    timeout=60.0
+                )
+                response.raise_for_status()
+                return QueryResponse(**response.json())
+        except Exception as e:
+            print(f"Error querying external KB: {e}")
+            raise HTTPException(status_code=500, detail=f"External KB Error: {str(e)}")
+
     start_time = time.time()
     
     query_vec = await cached_query_embedding(request.query)
@@ -87,14 +102,14 @@ Do not use external knowledge, prior assumptions, or general world knowledge.
 
 IMPORTANT GUIDELINES:
 1. For greetings ('Hi', 'Hello', 'Hey') or identity questions ('Who are you?', 'What can you do?'):
-   Respond warmly and introduce yourself as the {kb_name} assistant, mentioning you can help with questions about the documents.
+   Respond warmly and introduce yourself as the {kb_name} assistant, mentioning you can help with questions about the knowledge base.
 
 2. If the question is directly answered in the context:
    Provide a clear, concise answer based on the context.
 
 3. If the question is partially related but not fully answered in the context:
-   Politely acknowledge the question and provide a brief (one-liner) suggestion of related topics available in the documents.
-   Example: "I don't have specific details on that, but I can help you with [topic A], [topic B], or [topic C] from the documentation."
+   Politely acknowledge the question and provide a brief (one-liner) suggestion of related topics available in the knowledge base.
+   Example: "I don't have specific details on that, but I can help you with [topic A], [topic B], or [topic C] from the knowledge base."
 
 4. If the question is completely unrelated to the context:
    Politely redirect by mentioning what you CAN help with in one concise sentence.
@@ -238,110 +253,5 @@ async def cached_query_embedding(query: str):
     return await get_embedding(query)
 
 
-# IoT Device Endpoint
-class IotQueryRequest(BaseModel):
-    query: str
 
-class IotRegisterRequest(BaseModel):
-    api_key: str
-    kb_id: str
-
-@router.post("/iot/register")
-async def register_iot_api_key(request: IotRegisterRequest):
-    """
-    Register or update an API key mapping to a knowledge base.
-    """
-    from app.core.database import store_api_key_mapping
-    
-    if not request.api_key or not request.api_key.startswith('iot_'):
-        raise HTTPException(status_code=400, detail="Invalid API key format. Must start with 'iot_'")
-    
-    if not request.kb_id:
-        raise HTTPException(status_code=400, detail="Missing kb_id")
-    
-    # Verify KB exists
-    try:
-        get_kb_metadata(request.kb_id)
-    except Exception:
-        raise HTTPException(status_code=404, detail=f"Knowledge base {request.kb_id} not found")
-    
-    store_api_key_mapping(request.api_key, request.kb_id)
-    return {"message": "API key registered successfully", "api_key": request.api_key, "kb_id": request.kb_id}
-
-@router.post("/iot/query")
-async def iot_query(api_key: str, request: IotQueryRequest):
-    """
-    IoT device endpoint for querying knowledge bases.
-    Requires only api_key as query parameter. KB is looked up from the API key.
-    """
-    from app.core.database import get_kb_id_by_api_key
-    
-    # Validate API key format
-    if not api_key or not api_key.startswith('iot_'):
-        raise HTTPException(status_code=401, detail="Invalid or missing API key")
-    
-    # Look up KB ID from API key
-    kb_id = get_kb_id_by_api_key(api_key)
-    if not kb_id:
-        raise HTTPException(status_code=401, detail="API key not registered or invalid")
-    
-    try:
-        # Get query embedding
-        query_vec = await cached_query_embedding(request.query)
-        
-        # Query the knowledge base
-        results = query_documents(kb_id, query_vec, n_results=5)
-        
-        if not results['documents'] or not results['documents'][0]:
-            return {
-                "answer": "I don't have enough information to answer that.",
-                "kb_id": kb_id,
-                "timestamp": time.time()
-            }
-        
-        retrieved_chunks = results['documents'][0]
-        context = "\\n\\n".join(retrieved_chunks)
-        
-        # Fetch KB metadata for system prompt
-        metadata = get_kb_metadata(kb_id)
-        kb_name = metadata.get("name", "Knowledge Base")
-        
-        system_instruction = f"""You are the {kb_name} assistant - a helpful, polite, and friendly AI assistant.
-Your tone should be warm, professional, and conversational.
-Answer user questions using ONLY the information provided in the given context.
-Do not use external knowledge, prior assumptions, or general world knowledge.
-
-IMPORTANT GUIDELINES:
-1. For greetings ('Hi', 'Hello', 'Hey') or identity questions ('Who are you?', 'What can you do?'):
-   Respond warmly and introduce yourself as the {kb_name} assistant, mentioning you can help with questions about the documents.
-
-2. If the question is directly answered in the context:
-   Provide a clear, concise answer based on the context.
-
-3. If the question is partially related but not fully answered in the context:
-   Politely acknowledge the question and provide a brief (one-liner) suggestion of related topics available in the documents.
-   Example: "I don't have specific details on that, but I can help you with [topic A], [topic B], or [topic C] from the documentation."
-
-4. If the question is completely unrelated to the context:
-   Politely redirect by mentioning what you CAN help with in one concise sentence.
-   Example: "That topic isn't covered in my knowledge base, but I can assist you with [main topic areas]."
-
-5. NEVER simply say "I don't know" without offering helpful alternatives or suggestions.
-
-6. Keep responses concise and friendly. For suggestions, use a single sentence with 2-3 key topics.
-
-Always remain strictly scoped to the active knowledge base and do not reference any other knowledge bases.
-"""
-        
-        answer = await generate_response(context, request.query, system_instruction)
-        
-        return {
-            "answer": answer,
-            "kb_id": kb_id,
-            "kb_name": kb_name,
-            "timestamp": time.time()
-        }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error processing query: {str(e)}")
 

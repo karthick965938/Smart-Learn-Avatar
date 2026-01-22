@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "esp_err.h"
 #include "OpenAI.h"
 
 #define SSID_SIZE 32

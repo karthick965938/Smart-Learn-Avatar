@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "Smart Learn API"
     VERSION: str = "0.1.0"
     DESCRIPTION: str = "Smart Learn Avatar API application using FastAPI and ChromaDB"
+    KB_URL: str | None = None
 
     class Config:
         env_file = ".env"

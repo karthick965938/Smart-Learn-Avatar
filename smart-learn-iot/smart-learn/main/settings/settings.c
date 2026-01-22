@@ -5,6 +5,7 @@
  */
 
 #include <string.h>
+#include <inttypes.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_log.h"
@@ -127,9 +128,9 @@ esp_err_t settings_read_parameter_from_nvs(void)
     ESP_LOGI(TAG, "stored KB URL:%s", g_sys_param.kb_url);
     ESP_LOGI(TAG, "stored TTS Voice:%s", g_sys_param.tts_voice);
     ESP_LOGI(TAG, "stored Theme Type:%d", g_sys_param.theme_type);
-    ESP_LOGI(TAG, "stored BG Color:0x%06X", g_sys_param.bg_color);
-    ESP_LOGI(TAG, "stored Text Color:0x%06X", g_sys_param.text_color);
-    ESP_LOGI(TAG, "stored Button Color:0x%06X", g_sys_param.button_color);
+    ESP_LOGI(TAG, "stored BG Color:0x%06" PRIX32, g_sys_param.bg_color);
+    ESP_LOGI(TAG, "stored Text Color:0x%06" PRIX32, g_sys_param.text_color);
+    ESP_LOGI(TAG, "stored Button Color:0x%06" PRIX32, g_sys_param.button_color);
     return ESP_OK;
 
 err:

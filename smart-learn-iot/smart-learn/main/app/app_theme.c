@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: CC0-1.0
  */
 
+#include <inttypes.h>
 #include "app_theme.h"
 #include "esp_log.h"
 
@@ -60,12 +61,10 @@ void app_theme_apply(sys_param_t *param)
         return;
     }
     
-    ESP_LOGI(TAG, "Applying theme - Type:%d, BG:0x%06X, Text:0x%06X, Button:0x%06X",
+    ESP_LOGI(TAG, "Applying theme - Type:%d, BG:0x%06" PRIX32 ", Text:0x%06" PRIX32 ", Button:0x%06" PRIX32,
              param->theme_type, param->bg_color, param->text_color, param->button_color);
     
     // Get colors
-    lv_color_t bg_color = app_theme_get_bg_color(param);
-    lv_color_t text_color = app_theme_get_text_color(param);
     lv_color_t button_color = app_theme_get_button_color(param);
     
     // Apply theme to default display
