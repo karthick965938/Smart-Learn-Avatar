@@ -19,6 +19,9 @@ class CreateKBRequest(BaseModel):
 class KBResponse(BaseModel):
     id: str
     name: str
+    assistant_name: str = ""
+    instruction: str = ""
+    custom_instruction: bool = False
 
 @router.get("/kbs", response_model=list[KBResponse])
 async def get_all_knowledge_bases():
@@ -33,10 +36,17 @@ async def create_knowledge_base(request: CreateKBRequest):
     Create a new knowledge base.
     """
     kb_id = str(uuid.uuid4())[:8] # Short ID
-    set_kb_metadata(kb_id, request.name)
+    # Set default metadata with empty custom fields
+    set_kb_metadata(kb_id, request.name, assistant_name="", instruction="", custom_instruction=False)
     # Ensure collection exists
     get_collection(kb_id)
-    return KBResponse(id=kb_id, name=request.name)
+    return KBResponse(
+        id=kb_id, 
+        name=request.name,
+        assistant_name="",
+        instruction="",
+        custom_instruction=False
+    )
 
 class QueryRequest(BaseModel):
     query: str
@@ -48,14 +58,23 @@ class QueryResponse(BaseModel):
 
 class KBMetadataRequest(BaseModel):
     name: str
+    assistant_name: str = ""
+    instruction: str = ""
+    custom_instruction: bool = False
 
 @router.post("/kb/{kb_id}")
 async def set_knowledge_base_metadata(kb_id: str, request: KBMetadataRequest):
     """
-    Set metadata (e.g., name) for a knowledge base.
+    Set metadata (e.g., name, assistant_name, instruction, custom_instruction) for a knowledge base.
     """
-    set_kb_metadata(kb_id, request.name)
-    return {"message": f"Metadata updated for KB {kb_id}. Name set to '{request.name}'."}
+    set_kb_metadata(
+        kb_id, 
+        request.name, 
+        assistant_name=request.assistant_name,
+        instruction=request.instruction,
+        custom_instruction=request.custom_instruction
+    )
+    return {"message": f"Metadata updated for KB {kb_id}."}
 
 # ... (existing endpoints) ...
 
@@ -94,33 +113,45 @@ async def query_knowledge_base(kb_id: str, request: QueryRequest):
     # Fetch KB metadata for system prompt
     metadata = get_kb_metadata(kb_id)
     kb_name = metadata.get("name", "Knowledge Base")
+    assistant_name = metadata.get("assistant_name", kb_name)
     
-    system_instruction = f"""You are the {kb_name} assistant - a helpful, polite, and friendly AI assistant.
-Your tone should be warm, professional, and conversational.
-Answer user questions using ONLY the information provided in the given context.
-Do not use external knowledge, prior assumptions, or general world knowledge.
+    # Robust boolean check (handles bool, int 0/1, or string "true"/"false")
+    raw_enabled = metadata.get("custom_instruction", False)
+    custom_instruction_enabled = str(raw_enabled).lower() in ["true", "1", "t", "yes", "y"] if not isinstance(raw_enabled, bool) else raw_enabled
+    
+    custom_instruction_text = metadata.get("instruction", "")
+    
+    # Use custom instruction if enabled AND not empty, otherwise use default
+    if custom_instruction_enabled and custom_instruction_text.strip():
+        system_instruction = custom_instruction_text
+    else:
+        # Default instruction
+        system_instruction = f"""You are the {assistant_name} assistant - a helpful, polite, and friendly AI assistant.
+        Your tone should be warm, professional, and conversational.
+        Answer user questions using ONLY the information provided in the given context.
+        Do not use external knowledge, prior assumptions, or general world knowledge.
 
-IMPORTANT GUIDELINES:
-1. For greetings ('Hi', 'Hello', 'Hey') or identity questions ('Who are you?', 'What can you do?'):
-   Respond warmly and introduce yourself as the {kb_name} assistant, mentioning you can help with questions about the knowledge base.
+        IMPORTANT GUIDELINES:
+        1. For greetings ('Hi', 'Hello', 'Hey') or identity questions ('Who are you?', 'What can you do?'):
+        Respond warmly and introduce yourself as the {assistant_name} assistant, mentioning you can help with questions about the knowledge base.
 
-2. If the question is directly answered in the context:
-   Provide a clear, concise answer based on the context.
+        2. If the question is directly answered in the context:
+        Provide a clear, concise answer based on the context.
 
-3. If the question is partially related but not fully answered in the context:
-   Politely acknowledge the question and provide a brief (one-liner) suggestion of related topics available in the knowledge base.
-   Example: "I don't have specific details on that, but I can help you with [topic A], [topic B], or [topic C] from the knowledge base."
+        3. If the question is partially related but not fully answered in the context:
+        Politely acknowledge the question and provide a brief (one-liner) suggestion of related topics available in the knowledge base.
+        Example: "I don't have specific details on that, but I can help you with [topic A], [topic B], or [topic C] from the knowledge base."
 
-4. If the question is completely unrelated to the context:
-   Politely redirect by mentioning what you CAN help with in one concise sentence.
-   Example: "That topic isn't covered in my knowledge base, but I can assist you with [main topic areas]."
+        4. If the question is completely unrelated to the context:
+        Politely redirect by mentioning what you CAN help with in one concise sentence.
+        Example: "That topic isn't covered in my knowledge base, but I can assist you with [main topic areas]."
 
-5. NEVER simply say "I don't know" without offering helpful alternatives or suggestions.
+        5. NEVER simply say "I don't know" without offering helpful alternatives or suggestions.
 
-6. Keep responses concise and friendly. For suggestions, use a single sentence with 2-3 key topics.
+        6. Keep responses concise and friendly. For suggestions, use a single sentence with 2-3 key topics.
 
-Always remain strictly scoped to the active knowledge base and do not reference any other knowledge bases.
-"""
+        Always remain strictly scoped to the active knowledge base and do not reference any other knowledge bases.
+        """
 
     
     answer = await generate_response(context, request.query, system_instruction)

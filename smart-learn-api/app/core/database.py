@@ -14,9 +14,17 @@ def list_knowledge_bases() -> list[dict]:
         for col in collections:
             if col.name.startswith("kb_"):
                 kb_id = col.name[3:]
+                metadata = col.metadata or {}
+                # Robust boolean casting for the custom_instruction flag
+                raw_custom = metadata.get("custom_instruction", False)
+                custom_instruction = str(raw_custom).lower() in ["true", "1", "t", "yes", "y"] if not isinstance(raw_custom, bool) else raw_custom
+
                 kbs.append({
                     "id": kb_id,
-                    "name": col.metadata.get("name", kb_id) if col.metadata else kb_id
+                    "name": metadata.get("name", kb_id),
+                    "assistant_name": metadata.get("assistant_name", ""),
+                    "instruction": metadata.get("instruction", ""),
+                    "custom_instruction": custom_instruction
                 })
         return kbs
     except Exception as e:
@@ -88,12 +96,21 @@ def delete_knowledge_base(kb_id: str):
     except ValueError:
         pass  # Collection doesn't exist
 
-def set_kb_metadata(kb_id: str, name: str):
+def set_kb_metadata(kb_id: str, name: str, assistant_name: str = None, instruction: str = None, custom_instruction: bool = False):
     """
-    Set the human-readable name for a knowledge base.
+    Set metadata for a knowledge base including name, assistant name, custom instruction, and instruction text.
     """
     collection = get_collection(kb_id)
-    collection.modify(metadata={"name": name})
+    metadata = {"name": name}
+    
+    if assistant_name is not None:
+        metadata["assistant_name"] = assistant_name
+    if instruction is not None:
+        metadata["instruction"] = instruction
+    
+    metadata["custom_instruction"] = custom_instruction
+    
+    collection.modify(metadata=metadata)
 
 def get_kb_metadata(kb_id: str) -> dict:
     """
