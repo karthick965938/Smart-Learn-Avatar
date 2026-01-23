@@ -205,6 +205,10 @@ void avatar_stop_animations(void)
         lv_img_set_src(ui_ImageRelyBody, &ui_img_avatar_avatar_0_png);
         lv_obj_invalidate(ui_ImageRelyBody);
     }
+    if (ui_ImageSleepBody) {
+        lv_obj_set_y(ui_ImageSleepBody, 0);
+        lv_obj_invalidate(ui_ImageSleepBody);
+    }
 }
 
 ///////////////////// FUNCTIONS ////////////////////

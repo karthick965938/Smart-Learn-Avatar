@@ -19,8 +19,7 @@
 // Theme types
 typedef enum {
     THEME_DARK = 0,
-    THEME_LIGHT = 1,
-    THEME_CUSTOM = 2
+    THEME_LIGHT = 1
 } theme_type_t;
 
 typedef struct {
@@ -32,10 +31,7 @@ typedef struct {
     
     // Voice and UI settings
     char tts_voice[VOICE_SIZE];       /* TTS voice (alloy, echo, fable, onyx, nova, shimmer). */
-    uint8_t theme_type;               /* Theme type: 0=Dark, 1=Light, 2=Custom. */
-    uint32_t bg_color;                /* Background color (RGB 0xRRGGBB). */
-    uint32_t text_color;              /* Text color (RGB 0xRRGGBB). */
-    uint32_t button_color;            /* Button/primary color (RGB 0xRRGGBB). */
+    uint8_t theme_type;               /* Theme type: 0=Dark, 1=Light. */
 } sys_param_t;
 
 esp_err_t settings_factory_reset(void);

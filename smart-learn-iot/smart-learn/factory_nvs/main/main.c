@@ -52,9 +52,6 @@ void app_main(void)
     char kb_url[URL_SIZE] = {0};
     char tts_voice[32] = {0};
     uint8_t theme_type = 0;
-    uint32_t bg_color = 0;
-    uint32_t text_color = 0;
-    uint32_t button_color = 0;
 
     s_event_group = xEventGroupCreate();
 
@@ -140,39 +137,6 @@ void app_main(void)
             ESP_LOGI(TAG, "no theme type, give a init value: %d", theme_type);
         } else {
             ESP_LOGI(TAG, "stored theme type:%d", theme_type);
-        }
-
-        // Initialize background color
-        err = nvs_get_u32(my_handle, "bg_color", &bg_color);
-        if (err != ESP_OK) {
-            bg_color = CONFIG_UI_BG_COLOR;
-            ESP_ERROR_CHECK(nvs_set_u32(my_handle, "bg_color", bg_color));
-            ESP_ERROR_CHECK(nvs_commit(my_handle));
-            ESP_LOGI(TAG, "no bg_color, give a init value: 0x%06" PRIX32, bg_color);
-        } else {
-            ESP_LOGI(TAG, "stored bg_color:0x%06" PRIX32, bg_color);
-        }
-
-        // Initialize text color
-        err = nvs_get_u32(my_handle, "text_color", &text_color);
-        if (err != ESP_OK) {
-            text_color = CONFIG_UI_TEXT_COLOR;
-            ESP_ERROR_CHECK(nvs_set_u32(my_handle, "text_color", text_color));
-            ESP_ERROR_CHECK(nvs_commit(my_handle));
-            ESP_LOGI(TAG, "no text_color, give a init value: 0x%06" PRIX32, text_color);
-        } else {
-            ESP_LOGI(TAG, "stored text_color:0x%06" PRIX32, text_color);
-        }
-
-        // Initialize button color
-        err = nvs_get_u32(my_handle, "button_color", &button_color);
-        if (err != ESP_OK) {
-            button_color = CONFIG_UI_BUTTON_COLOR;
-            ESP_ERROR_CHECK(nvs_set_u32(my_handle, "button_color", button_color));
-            ESP_ERROR_CHECK(nvs_commit(my_handle));
-            ESP_LOGI(TAG, "no button_color, give a init value: 0x%06" PRIX32, button_color);
-        } else {
-            ESP_LOGI(TAG, "stored button_color:0x%06" PRIX32, button_color);
         }
     }
     nvs_close(my_handle);

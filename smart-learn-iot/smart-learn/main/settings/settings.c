@@ -87,8 +87,8 @@ esp_err_t settings_read_parameter_from_nvs(void)
     len = sizeof(g_sys_param.tts_voice);
     ret = nvs_get_str(my_handle, "tts_voice", g_sys_param.tts_voice, &len);
     if (ret != ESP_OK || len == 0) {
-        ESP_LOGI(TAG, "No TTS voice found, using default: shimmer");
-        strcpy(g_sys_param.tts_voice, "shimmer");
+        ESP_LOGI(TAG, "No TTS voice found, using default: %s", CONFIG_TTS_VOICE);
+        strcpy(g_sys_param.tts_voice, CONFIG_TTS_VOICE);
     }
 
     // Read theme type (optional - use default if not found)
@@ -96,27 +96,6 @@ esp_err_t settings_read_parameter_from_nvs(void)
     if (ret != ESP_OK) {
         ESP_LOGI(TAG, "No theme type found, using default: Dark (0)");
         g_sys_param.theme_type = 0; // THEME_DARK
-    }
-
-    // Read background color (optional - use default if not found)
-    ret = nvs_get_u32(my_handle, "bg_color", &g_sys_param.bg_color);
-    if (ret != ESP_OK) {
-        ESP_LOGI(TAG, "No bg_color found, using default: 0x000000");
-        g_sys_param.bg_color = 0x000000; // Black
-    }
-
-    // Read text color (optional - use default if not found)
-    ret = nvs_get_u32(my_handle, "text_color", &g_sys_param.text_color);
-    if (ret != ESP_OK) {
-        ESP_LOGI(TAG, "No text_color found, using default: 0xFFFFFF");
-        g_sys_param.text_color = 0xFFFFFF; // White
-    }
-
-    // Read button color (optional - use default if not found)
-    ret = nvs_get_u32(my_handle, "button_color", &g_sys_param.button_color);
-    if (ret != ESP_OK) {
-        ESP_LOGI(TAG, "No button_color found, using default: 0x04B900");
-        g_sys_param.button_color = 0x04B900; // Green
     }
 
     nvs_close(my_handle);
@@ -128,9 +107,7 @@ esp_err_t settings_read_parameter_from_nvs(void)
     ESP_LOGI(TAG, "stored KB URL:%s", g_sys_param.kb_url);
     ESP_LOGI(TAG, "stored TTS Voice:%s", g_sys_param.tts_voice);
     ESP_LOGI(TAG, "stored Theme Type:%d", g_sys_param.theme_type);
-    ESP_LOGI(TAG, "stored BG Color:0x%06" PRIX32, g_sys_param.bg_color);
-    ESP_LOGI(TAG, "stored Text Color:0x%06" PRIX32, g_sys_param.text_color);
-    ESP_LOGI(TAG, "stored Button Color:0x%06" PRIX32, g_sys_param.button_color);
+    return ESP_OK;
     return ESP_OK;
 
 err:

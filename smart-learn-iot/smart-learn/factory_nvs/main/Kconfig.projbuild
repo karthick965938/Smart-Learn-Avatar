@@ -67,36 +67,11 @@ menu "Example Configuration"
             bool "Dark Theme"
         config UI_THEME_LIGHT
             bool "Light Theme"
-        config UI_THEME_CUSTOM
-            bool "Custom Theme"
     endchoice
 
     config UI_THEME_TYPE
         int
         default 0 if UI_THEME_DARK
         default 1 if UI_THEME_LIGHT
-        default 2 if UI_THEME_CUSTOM
-
-    config UI_BG_COLOR
-        hex "Background Color (RGB)"
-        default 0x000000 if UI_THEME_DARK
-        default 0xFFFFFF if UI_THEME_LIGHT
-        default 0x1a1a2e if UI_THEME_CUSTOM
-        help
-            Background color in RGB hex format (0xRRGGBB).
-
-    config UI_TEXT_COLOR
-        hex "Text Color (RGB)"
-        default 0xFFFFFF if UI_THEME_DARK
-        default 0x000000 if UI_THEME_LIGHT
-        default 0xFFFFFF if UI_THEME_CUSTOM
-        help
-            Text color in RGB hex format (0xRRGGBB).
-
-    config UI_BUTTON_COLOR
-        hex "Button/Primary Color (RGB)"
-        default 0x04B900
-        help
-            Button and primary color in RGB hex format (0xRRGGBB).
 
 endmenu

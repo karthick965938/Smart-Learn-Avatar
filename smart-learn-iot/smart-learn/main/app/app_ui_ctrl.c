@@ -309,25 +309,28 @@ void ui_sleep_show_animation(void)
 {
     bsp_display_lock(0);
 
-    if (!ui_ContainerBigZ || !ui_ContainerSmallZ) {
+    if (!ui_ContainerBigZ || !ui_ContainerSmallZ || !ui_ImageSleepBody) {
         bsp_display_unlock();
         return;
     }
 
-    // Stop existing animations on z containers first to prevent conflicts
+    // Stop existing animations on z containers and body first to prevent conflicts
     lv_anim_del(ui_ContainerBigZ, NULL);
     lv_anim_del(ui_ContainerSmallZ, NULL);
+    lv_anim_del(ui_ImageSleepBody, NULL);
     
     // Process any pending animations
     lv_timer_handler();
     
-    // Reset opacity to initial state (0) for smooth start
+    // Reset to initial state for smooth start
     lv_obj_set_style_bg_img_opa(ui_ContainerBigZ, 0, 0);
     lv_obj_set_style_bg_img_opa(ui_ContainerSmallZ, 0, 0);
+    lv_obj_set_y(ui_ImageSleepBody, 0);
     
     // Force immediate refresh
     lv_obj_invalidate(ui_ContainerBigZ);
     lv_obj_invalidate(ui_ContainerSmallZ);
+    lv_obj_invalidate(ui_ImageSleepBody);
     
     // Small delay to ensure clean state
     lv_timer_handler();
@@ -338,14 +341,14 @@ void ui_sleep_show_animation(void)
     PropertyAnimation_0_user_data->val = -1;
     lv_anim_t PropertyAnimation_0;
     lv_anim_init(&PropertyAnimation_0);
-    lv_anim_set_var(&PropertyAnimation_0, ui_ContainerBigZ);  // Set target object for proper tracking
+    lv_anim_set_var(&PropertyAnimation_0, ui_ContainerBigZ);
     lv_anim_set_time(&PropertyAnimation_0, 1000);
     lv_anim_set_user_data(&PropertyAnimation_0, PropertyAnimation_0_user_data);
     lv_anim_set_custom_exec_cb(&PropertyAnimation_0, anim_callback_set_bg_img_opacity);
     lv_anim_set_values(&PropertyAnimation_0, 0, 255);
     lv_anim_set_path_cb(&PropertyAnimation_0, lv_anim_path_linear);
     lv_anim_set_delay(&PropertyAnimation_0, 0);
-    lv_anim_set_deleted_cb(&PropertyAnimation_0, _ui_anim_callback_free_user_data);  // Enable cleanup
+    lv_anim_set_deleted_cb(&PropertyAnimation_0, _ui_anim_callback_free_user_data);
     lv_anim_set_playback_time(&PropertyAnimation_0, 1000);
     lv_anim_set_playback_delay(&PropertyAnimation_0, 0);
     lv_anim_set_repeat_count(&PropertyAnimation_0, LV_ANIM_REPEAT_INFINITE);
@@ -360,14 +363,14 @@ void ui_sleep_show_animation(void)
     PropertyAnimation_1_user_data->val = -1;
     lv_anim_t PropertyAnimation_1;
     lv_anim_init(&PropertyAnimation_1);
-    lv_anim_set_var(&PropertyAnimation_1, ui_ContainerSmallZ);  // Set target object for proper tracking
+    lv_anim_set_var(&PropertyAnimation_1, ui_ContainerSmallZ);
     lv_anim_set_time(&PropertyAnimation_1, 1000);
     lv_anim_set_user_data(&PropertyAnimation_1, PropertyAnimation_1_user_data);
     lv_anim_set_custom_exec_cb(&PropertyAnimation_1, anim_callback_set_bg_img_opacity);
     lv_anim_set_values(&PropertyAnimation_1, 0, 255);
     lv_anim_set_path_cb(&PropertyAnimation_1, lv_anim_path_linear);
     lv_anim_set_delay(&PropertyAnimation_1, 1000);
-    lv_anim_set_deleted_cb(&PropertyAnimation_1, _ui_anim_callback_free_user_data);  // Enable cleanup
+    lv_anim_set_deleted_cb(&PropertyAnimation_1, _ui_anim_callback_free_user_data);
     lv_anim_set_playback_time(&PropertyAnimation_1, 1000);
     lv_anim_set_playback_delay(&PropertyAnimation_1, 0);
     lv_anim_set_repeat_count(&PropertyAnimation_1, LV_ANIM_REPEAT_INFINITE);
@@ -375,6 +378,29 @@ void ui_sleep_show_animation(void)
     lv_anim_set_early_apply(&PropertyAnimation_1, false);
     lv_anim_set_get_value_cb(&PropertyAnimation_1, &anim_callback_get_opacity);
     lv_anim_start(&PropertyAnimation_1);
+
+    // Body Floating Animation (from provided configuration)
+    // Start: 0, End: 5, Relative, Time: 2000, Repeat: Infinite
+    ui_anim_user_data_t *PropertyAnimation_2_user_data = lv_mem_alloc(sizeof(ui_anim_user_data_t));
+    PropertyAnimation_2_user_data->target = ui_ImageSleepBody;
+    PropertyAnimation_2_user_data->val = -1;
+    lv_anim_t PropertyAnimation_2;
+    lv_anim_init(&PropertyAnimation_2);
+    lv_anim_set_var(&PropertyAnimation_2, ui_ImageSleepBody);
+    lv_anim_set_time(&PropertyAnimation_2, 2000);
+    lv_anim_set_user_data(&PropertyAnimation_2, PropertyAnimation_2_user_data);
+    lv_anim_set_custom_exec_cb(&PropertyAnimation_2, _ui_anim_callback_set_y);
+    lv_anim_set_values(&PropertyAnimation_2, 0, 5);
+    lv_anim_set_path_cb(&PropertyAnimation_2, lv_anim_path_linear);
+    lv_anim_set_delay(&PropertyAnimation_2, 0);
+    lv_anim_set_deleted_cb(&PropertyAnimation_2, _ui_anim_callback_free_user_data);
+    lv_anim_set_playback_time(&PropertyAnimation_2, 0);
+    lv_anim_set_playback_delay(&PropertyAnimation_2, 0);
+    lv_anim_set_repeat_count(&PropertyAnimation_2, LV_ANIM_REPEAT_INFINITE);
+    lv_anim_set_repeat_delay(&PropertyAnimation_2, 0);
+    lv_anim_set_early_apply(&PropertyAnimation_2, false);
+    lv_anim_set_get_value_cb(&PropertyAnimation_2, &_ui_anim_callback_get_y);
+    lv_anim_start(&PropertyAnimation_2);
 
     bsp_display_unlock();
 }
