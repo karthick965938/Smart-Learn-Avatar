@@ -92,10 +92,22 @@ esp_err_t settings_read_parameter_from_nvs(void)
     }
 
     // Read theme type (optional - use default if not found)
-    ret = nvs_get_u8(my_handle, "theme_type", &g_sys_param.theme_type);
-    if (ret != ESP_OK) {
-        ESP_LOGI(TAG, "No theme type found, using default: Dark (0)");
-        g_sys_param.theme_type = 0; // THEME_DARK
+    // Try reading as string first (new format for UF2 support)
+    char theme_str[4];
+    len = sizeof(theme_str);
+    ret = nvs_get_str(my_handle, "theme_type", theme_str, &len);
+    if (ret == ESP_OK && len > 0) {
+        g_sys_param.theme_type = atoi(theme_str);
+        ESP_LOGI(TAG, "Theme Type (string format): %d", g_sys_param.theme_type);
+    } else {
+        // Fallback to u8 for backward compatibility
+        ret = nvs_get_u8(my_handle, "theme_type", &g_sys_param.theme_type);
+        if (ret != ESP_OK) {
+            ESP_LOGI(TAG, "No theme type found, using default: Dark (0)");
+            g_sys_param.theme_type = 0; // THEME_DARK
+        } else {
+            ESP_LOGI(TAG, "Theme Type (u8 format): %d", g_sys_param.theme_type);
+        }
     }
 
     nvs_close(my_handle);

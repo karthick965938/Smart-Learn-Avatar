@@ -16,6 +16,7 @@
 #include "ui.h"
 #include "bsp/esp-bsp.h"
 #include "esp_ota_ops.h"
+#include "app_theme.h"
 
 #define NVS_MODIFIED_BIT          BIT0
 #define SSID_SIZE 32
@@ -120,7 +121,7 @@ void app_main(void)
         // Initialize TTS voice
         buf_len_long = sizeof(tts_voice);
         err = nvs_get_str(my_handle, "tts_voice", tts_voice, &buf_len_long);
-        if (err != ESP_OK || buf_len_long == 0) {
+        if (err != ESP_OK || buf_len_long <= 1) { // 1 is just null terminator
             ESP_ERROR_CHECK(nvs_set_str(my_handle, "tts_voice", CONFIG_TTS_VOICE));
             ESP_ERROR_CHECK(nvs_commit(my_handle));
             ESP_LOGI(TAG, "no TTS voice, give a init value: %s", CONFIG_TTS_VOICE);
@@ -128,14 +129,26 @@ void app_main(void)
             ESP_LOGI(TAG, "stored TTS voice:%s", tts_voice);
         }
 
-        // Initialize theme type
-        err = nvs_get_u8(my_handle, "theme_type", &theme_type);
-        if (err != ESP_OK) {
-            theme_type = CONFIG_UI_THEME_TYPE;
-            ESP_ERROR_CHECK(nvs_set_u8(my_handle, "theme_type", theme_type));
-            ESP_ERROR_CHECK(nvs_commit(my_handle));
-            ESP_LOGI(TAG, "no theme type, give a init value: %d", theme_type);
+        // Initialize theme type (stored as string for UF2 compatibility)
+        char theme_str[4];
+        buf_len_long = sizeof(theme_str);
+        err = nvs_get_str(my_handle, "theme_type", theme_str, &buf_len_long);
+        if (err != ESP_OK || buf_len_long <= 1) {
+            if (err == ESP_ERR_NVS_TYPE_MISMATCH) {
+                // Erase old u8 value if it exists to replace with string
+                nvs_erase_key(my_handle, "theme_type");
+                ESP_LOGI(TAG, "Erased old theme_type to change type to string");
+            }
+            sprintf(theme_str, "%d", CONFIG_UI_THEME_TYPE);
+            err = nvs_set_str(my_handle, "theme_type", theme_str);
+            if (err == ESP_OK) {
+                ESP_ERROR_CHECK(nvs_commit(my_handle));
+                ESP_LOGI(TAG, "no theme type, give a init value: %s", theme_str);
+            } else {
+                ESP_LOGE(TAG, "Failed to set theme_type string: %s", esp_err_to_name(err));
+            }
         } else {
+            theme_type = atoi(theme_str);
             ESP_LOGI(TAG, "stored theme type:%d", theme_type);
         }
     }
@@ -162,6 +175,7 @@ void app_main(void)
     bsp_display_start_with_config(&cfg);
     bsp_display_backlight_on();
     ui_init();
+    app_theme_apply(theme_type);
 
     while (1) {
         EventBits_t bits = xEventGroupWaitBits(s_event_group, NVS_MODIFIED_BIT,
@@ -183,7 +197,7 @@ void app_main(void)
                 nvs_close(my_handle);
                 return;
             }
-            ESP_LOGD(TAG, "SSID", ssid);
+            ESP_LOGI(TAG, "SSID: %s", ssid);
 
             buf_len_long = sizeof(password);
             err = nvs_get_str(my_handle, "password", password, &buf_len_long);
@@ -192,7 +206,7 @@ void app_main(void)
                 nvs_close(my_handle);
                 return;
             }
-            ESP_LOGD(TAG, "Password", password);
+            ESP_LOGI(TAG, "Password: %s", password);
 
             buf_len_long = sizeof(key);
             err = nvs_get_str(my_handle, "ChatGPT_key", key, &buf_len_long);
@@ -201,7 +215,7 @@ void app_main(void)
                 nvs_close(my_handle);
                 return;
             }
-            ESP_LOGD(TAG, "OpenAI Key", key);
+            ESP_LOGI(TAG, "OpenAI Key: %s", key);
 
             buf_len_long = sizeof(url);
             err = nvs_get_str(my_handle, "Base_url", url, &buf_len_long);
@@ -210,7 +224,7 @@ void app_main(void)
                 nvs_close(my_handle);
                 return;
             }
-            ESP_LOGD(TAG, "BASE url", url);
+            ESP_LOGI(TAG, "BASE url: %s", url);
 
             buf_len_long = sizeof(kb_url);
             err = nvs_get_str(my_handle, "KB_url", kb_url, &buf_len_long);
@@ -219,7 +233,28 @@ void app_main(void)
                 nvs_close(my_handle);
                 return;
             }
-            ESP_LOGD(TAG, "KB url", kb_url);
+            ESP_LOGI(TAG, "KB url: %s", kb_url);
+
+            buf_len_long = sizeof(tts_voice);
+            err = nvs_get_str(my_handle, "tts_voice", tts_voice, &buf_len_long);
+            if (err != ESP_OK) {
+                ESP_LOGE(TAG, "Failed to read 'tts_voice' from NVS: %s", esp_err_to_name(err));
+                nvs_close(my_handle);
+                return;
+            }
+            ESP_LOGI(TAG, "TTS Voice: %s", tts_voice);
+
+            char theme_str[4];
+            buf_len_long = sizeof(theme_str);
+            err = nvs_get_str(my_handle, "theme_type", theme_str, &buf_len_long);
+            if (err != ESP_OK) {
+                ESP_LOGE(TAG, "Failed to read 'theme_type' from NVS: %s", esp_err_to_name(err));
+                nvs_close(my_handle);
+                return;
+            }
+            theme_type = atoi(theme_str);
+            ESP_LOGI(TAG, "Theme Type: %d", theme_type);
+            app_theme_apply(theme_type);
             nvs_close(my_handle);
         }
 
