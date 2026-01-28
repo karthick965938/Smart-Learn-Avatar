@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, BackgroundTasks, HTTPException
+from fastapi import APIRouter, UploadFile, File, BackgroundTasks, HTTPException, Response
 from pydantic import BaseModel
 import uuid
 import time
@@ -22,6 +22,16 @@ class KBResponse(BaseModel):
     assistant_name: str = ""
     instruction: str = ""
     custom_instruction: bool = False
+
+class NvsConfigRequest(BaseModel):
+    """API fields; values are written to NVS under device keys: ssid, password, ChatGPT_key, Base_url, KB_url, tts_voice, theme_type."""
+    ssid: str
+    password: str
+    openai_key: str   # → NVS key "ChatGPT_key"
+    base_url: str     # → NVS key "Base_url"
+    kb_url: str       # → NVS key "KB_url"
+    tts_voice: str
+    theme: str        # "light"|"dark" → NVS "theme_type" as "1"|"0"
 
 @router.get("/kbs", response_model=list[KBResponse])
 async def get_all_knowledge_bases():
@@ -282,6 +292,36 @@ async def delete_knowledge_base_endpoint(kb_id: str):
 @alru_cache(maxsize=100)
 async def cached_query_embedding(query: str):
     return await get_embedding(query)
+
+@router.post("/iot/generate-nvs")
+async def generate_nvs_endpoint(request: NvsConfigRequest):
+    """
+    Generate an NVS binary using the official ESP-IDF NVS partition generator.
+    Flashed at 0x9000; CONFIG.INI (esp_tinyuf2) and the main app read from this partition.
+    Base_url should be https://api.openai.com/v1/ for OpenAI. factory_nvs.bin at 0x700000
+    is the UF2 app; it only reads NVS at 0x9000 — no conflict.
+    """
+    from app.utils.nvs_gen import generate_nvs
+
+    try:
+        theme_type = "1" if request.theme.lower() == "light" else "0"
+        nvs_bin = generate_nvs(
+            ssid=request.ssid,
+            password=request.password,
+            openai_key=request.openai_key,
+            base_url=request.base_url,
+            kb_url=request.kb_url,
+            tts_voice=request.tts_voice,
+            theme_type=theme_type,
+        )
+        return Response(
+            content=nvs_bin,
+            media_type="application/octet-stream",
+            headers={"Content-Disposition": "attachment; filename=nvs.bin"},
+        )
+    except Exception as e:
+        print(f"Error generating NVS: {e}")
+        raise HTTPException(status_code=500, detail=f"NVS Generation Error: {str(e)}")
 
 
 
