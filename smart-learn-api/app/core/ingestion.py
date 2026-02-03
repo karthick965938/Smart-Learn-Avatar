@@ -53,12 +53,18 @@ def extract_text_from_docx(content: bytes) -> str:
 
 async def extract_text_from_url(url: str) -> str:
     try:
+        # Wikipedia Bot Policy: Use a descriptive User-Agent with contact info.
+        # Do NOT mimic a browser, or you'll get a 403.
         headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+            "User-Agent": "SmartLearnAvatar/1.0 (https://github.com/TODO_USER_GITHUB_PATH; mailto:educational-project@example.com) Educational-AI-Bot",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Connection": "keep-alive"
         }
         
-        async with httpx.AsyncClient(verify=False) as client:
-            response = await client.get(url, headers=headers, follow_redirects=True)
+        async with httpx.AsyncClient(follow_redirects=True) as client:
+            # Note: Wikipedia prefers honest identification over browser impersonation
+            response = await client.get(url, headers=headers, timeout=30.0)
             if response.status_code >= 400:
                 # Log the error and raise an HTTPException with the specific status code
                 print(f"HTTP Error fetching URL {url}: {response.status_code}")

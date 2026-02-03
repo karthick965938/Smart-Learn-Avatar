@@ -13,6 +13,9 @@ from app.config import settings
 
 router = APIRouter()
 
+# Global conversation history: {kb_id: [ {"role": "user/assistant", "content": "...", "timestamp": ...} ]}
+chat_histories = {}
+
 class CreateKBRequest(BaseModel):
     name: str
 
@@ -22,6 +25,8 @@ class KBResponse(BaseModel):
     assistant_name: str = ""
     instruction: str = ""
     custom_instruction: bool = False
+    conversation_types: list[str] = []
+    document_count: int = 0
 
 class NvsConfigRequest(BaseModel):
     """API fields; values are written to NVS under device keys: ssid, password, ChatGPT_key, Base_url, KB_url, tts_voice, theme_type."""
@@ -47,7 +52,7 @@ async def create_knowledge_base(request: CreateKBRequest):
     """
     kb_id = str(uuid.uuid4())[:8] # Short ID
     # Set default metadata with empty custom fields
-    set_kb_metadata(kb_id, request.name, assistant_name="", instruction="", custom_instruction=False)
+    set_kb_metadata(kb_id, request.name, assistant_name="", instruction="", custom_instruction=False, conversation_types=[])
     # Ensure collection exists
     get_collection(kb_id)
     return KBResponse(
@@ -55,7 +60,8 @@ async def create_knowledge_base(request: CreateKBRequest):
         name=request.name,
         assistant_name="",
         instruction="",
-        custom_instruction=False
+        custom_instruction=False,
+        conversation_types=[]
     )
 
 class QueryRequest(BaseModel):
@@ -71,18 +77,20 @@ class KBMetadataRequest(BaseModel):
     assistant_name: str = ""
     instruction: str = ""
     custom_instruction: bool = False
+    conversation_types: list[str] = []
 
 @router.post("/kb/{kb_id}")
 async def set_knowledge_base_metadata(kb_id: str, request: KBMetadataRequest):
     """
-    Set metadata (e.g., name, assistant_name, instruction, custom_instruction) for a knowledge base.
+    Set metadata (e.g., name, assistant_name, instruction, custom_instruction, conversation_types) for a knowledge base.
     """
     set_kb_metadata(
         kb_id, 
         request.name, 
         assistant_name=request.assistant_name,
         instruction=request.instruction,
-        custom_instruction=request.custom_instruction
+        custom_instruction=request.custom_instruction,
+        conversation_types=request.conversation_types
     )
     return {"message": f"Metadata updated for KB {kb_id}."}
 
@@ -113,13 +121,6 @@ async def query_knowledge_base(kb_id: str, request: QueryRequest):
     
     results = query_documents(kb_id, query_vec, n_results=5)
     
-    if not results['documents'] or not results['documents'][0]:
-        return QueryResponse(answer="I don't have enough information to answer that.", context=[], latency=time.time() - start_time)
-    
-    retrieved_chunks = results['documents'][0]
-    
-    context = "\n\n".join(retrieved_chunks)
-    
     # Fetch KB metadata for system prompt
     metadata = get_kb_metadata(kb_id)
     kb_name = metadata.get("name", "Knowledge Base")
@@ -128,44 +129,121 @@ async def query_knowledge_base(kb_id: str, request: QueryRequest):
     # Robust boolean check (handles bool, int 0/1, or string "true"/"false")
     raw_enabled = metadata.get("custom_instruction", False)
     custom_instruction_enabled = str(raw_enabled).lower() in ["true", "1", "t", "yes", "y"] if not isinstance(raw_enabled, bool) else raw_enabled
-    
     custom_instruction_text = metadata.get("instruction", "")
     
-    # Use custom instruction if enabled AND not empty, otherwise use default
+    if not results['documents'] or not results['documents'][0]:
+        retrieved_chunks = []
+    else:
+        retrieved_chunks = results['documents'][0]
+    
+    context = "\n\n".join(retrieved_chunks) if retrieved_chunks else ""
+    
+    # Check if the KB has ANY documents at all
+    from app.core.database import has_documents
+    kb_has_data = has_documents(kb_id)
+
+    # Fetch and clean document names for identity/intro summary
+    raw_docs = list_documents(kb_id)
+    cleaned_docs = []
+    for d in raw_docs:
+        # 1. Handle URLs (specifically Wikipedia)
+        if d.startswith("http"):
+            # Take last part of path, replace underscores/dashes with spaces, title case
+            clean_name = d.split("/")[-1].replace("_", " ").replace("-", " ")
+        else:
+            # 2. Handle filenames (remove extensions)
+            clean_name = d.rsplit(".", 1)[0] if "." in d else d
+        
+        if clean_name.strip():
+            cleaned_docs.append(clean_name.strip())
+
+    if len(cleaned_docs) > 1:
+        doc_summary = ", ".join(cleaned_docs[:-1]) + " and " + cleaned_docs[-1]
+    elif len(cleaned_docs) == 1:
+        doc_summary = cleaned_docs[0]
+    else:
+        doc_summary = "general topics"
+
+    # Determine system instruction
     if custom_instruction_enabled and custom_instruction_text.strip():
-        system_instruction = custom_instruction_text
+        # Replace placeholders like {assistant_name} and {kb_name} to make instructions dynamic
+        system_instruction = custom_instruction_text.replace("{assistant_name}", assistant_name).replace("{kb_name}", kb_name)
+        
+        # Grounding Logic:
+        # 1. If KB has data: Enforce strict grounding (use context or decline)
+        # 2. If KB is empty: Let the AI speak freely based on the custom instruction personality
+        if kb_has_data:
+            if context.strip():
+                system_instruction += f"\n\nIMPORTANT: Use the provided context from the '{kb_name}' knowledge base to answer. Avoid using outside knowledge. If the answer is not in the context, politely say you don't have that specific information."
+            else:
+                system_instruction += f"\n\nIMPORTANT: The user is asking about a topic not found in the '{kb_name}' knowledge base. Politely explain that you can only answer questions based on the provided documents ({doc_summary}) and suggest what topics YOU CAN help with."
     else:
         # Default instruction
-        system_instruction = f"""You are the {assistant_name} assistant - a helpful, polite, and friendly AI assistant.
-        Your tone should be warm, professional, and conversational.
-        Answer user questions using ONLY the information provided in the given context.
-        Do not use external knowledge, prior assumptions, or general world knowledge.
+        if not kb_has_data:
+            # KB is empty - allow free-roaming helpful assistant
+            system_instruction = f"""You are {assistant_name}, a helpful, polite, and friendly AI assistant.
+            Your tone should be warm, professional, and conversational.
+            If asked who you are, introduce yourself as {assistant_name} and mention you are ready to help once documents are added to the '{kb_name}'.
+            """
+        else:
+            # KB has data - enforce grounding and identity
+            system_instruction = f"""You are {assistant_name}, the {kb_name} assistant. 
+            I have specific knowledge about: {doc_summary}.
+            
+            IDENTITY GUIDELINES:
+            If the user asks "Who are you?" or "What is your name?", always respond naturally:
+            "I am {assistant_name}, your {kb_name} assistant. I have knowledge about {doc_summary}."
+            
+            Your tone should be warm, professional, and conversational.
+            
+            GROUNDING RULES:
+            1. Answer questions ONLY using the information provided in the context from the '{kb_name}'.
+            2. If context is provided, give a clear, concise answer based strictly on that context.
+            3. If context is NOT relevant, politely explain that your current knowledge is limited to {doc_summary} and suggest those topics.
 
-        IMPORTANT GUIDELINES:
-        1. For greetings ('Hi', 'Hello', 'Hey') or identity questions ('Who are you?', 'What can you do?'):
-        Respond warmly and introduce yourself as the {assistant_name} assistant, mentioning you can help with questions about the knowledge base.
+            NEVER use outside knowledge to answer if documents have been provided.
+            """
 
-        2. If the question is directly answered in the context:
-        Provide a clear, concise answer based on the context.
+    # Append conversation-type-specific behavior from KB metadata
+    ct = metadata.get("conversation_types") or []
+    extras = []
+    if "Q&A" in ct:
+        extras.append("Answer in a direct, concise Q&A style. Prioritize clarity and brevity.")
+    if "Follow-up Question" in ct:
+        extras.append("Support follow-up questions (e.g. 'Can you elaborate?', 'What about X?'). Keep conversation context in mind and welcome follow-ups.")
+    if "Revision Mode" in ct:
+        extras.append("If the user requests a revision, rephrasing, or says 'Actually I meant...', provide an updated answer willingly and without repeating the old one at length.")
+    if extras:
+        system_instruction = (system_instruction.rstrip() + "\n\nConversation behavior:\n" + "\n".join("- " + e for e in extras) + "\n")
 
-        3. If the question is partially related but not fully answered in the context:
-        Politely acknowledge the question and provide a brief (one-liner) suggestion of related topics available in the knowledge base.
-        Example: "I don't have specific details on that, but I can help you with [topic A], [topic B], or [topic C] from the knowledge base."
+    # Final constraint: brevity (for small device screens)
+    system_instruction += "\n\nIMPORTANT: Keep your response extremely short and concise (less than 200 characters)."
 
-        4. If the question is completely unrelated to the context:
-        Politely redirect by mentioning what you CAN help with in one concise sentence.
-        Example: "That topic isn't covered in my knowledge base, but I can assist you with [main topic areas]."
-
-        5. NEVER simply say "I don't know" without offering helpful alternatives or suggestions.
-
-        6. Keep responses concise and friendly. For suggestions, use a single sentence with 2-3 key topics.
-
-        Always remain strictly scoped to the active knowledge base and do not reference any other knowledge bases.
-        """
-
+    # --- Conversation History Logic ---
+    now = time.time()
+    if kb_id not in chat_histories:
+        chat_histories[kb_id] = []
     
-    answer = await generate_response(context, request.query, system_instruction)
+    # Clear history if more than 5 minutes have passed since the last interaction
+    if chat_histories[kb_id] and (now - chat_histories[kb_id][-1]["timestamp"] > 300):
+        chat_histories[kb_id] = []
     
+    # Extract the last 6 messages (3 User-Assistant exchanges) for the LLM context
+    # We only pass 'role' and 'content' to generate_response
+    llm_history = [
+        {"role": m["role"], "content": m["content"]} 
+        for m in chat_histories[kb_id][-6:]
+    ]
+
+    answer = await generate_response(context, request.query, system_instruction, history=llm_history)
+    
+    # Store current interaction in history
+    chat_histories[kb_id].append({"role": "user", "content": request.query, "timestamp": now})
+    chat_histories[kb_id].append({"role": "assistant", "content": answer, "timestamp": time.time()})
+    
+    # Optional: Keep the internal history list small (last 20 messages)
+    chat_histories[kb_id] = chat_histories[kb_id][-20:]
+
     latency = time.time() - start_time
     
     return QueryResponse(
