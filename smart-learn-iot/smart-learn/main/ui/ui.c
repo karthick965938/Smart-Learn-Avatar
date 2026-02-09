@@ -123,7 +123,7 @@ void avatar_speaking_Animation(lv_obj_t *TargetObject, int delay)
     lv_anim_t PropertyAnimation_0;
     lv_anim_init(&PropertyAnimation_0);
     lv_anim_set_var(&PropertyAnimation_0, TargetObject);  // Set target object
-    lv_anim_set_time(&PropertyAnimation_0, 1500);  // 1.5 seconds - slower speaking animation
+    lv_anim_set_time(&PropertyAnimation_0, 2000);  // 2 seconds - even slower speaking animation
     lv_anim_set_user_data(&PropertyAnimation_0, PropertyAnimation_0_user_data);
     lv_anim_set_custom_exec_cb(&PropertyAnimation_0, _ui_anim_callback_set_image_frame);
     lv_anim_set_values(&PropertyAnimation_0, 0, 5);  // 6 frames (0-5) - reduced from 7 due to binary size
@@ -166,7 +166,7 @@ void avatar_listening_Animation(lv_obj_t *TargetObject, int delay)
     lv_anim_t PropertyAnimation_0;
     lv_anim_init(&PropertyAnimation_0);
     lv_anim_set_var(&PropertyAnimation_0, TargetObject);  // Set target object
-    lv_anim_set_time(&PropertyAnimation_0, 1500);  // 1.5 seconds - slower listening animation
+    lv_anim_set_time(&PropertyAnimation_0, 2500);  // 2.5 seconds - even slower listening animation
     lv_anim_set_user_data(&PropertyAnimation_0, PropertyAnimation_0_user_data);
     lv_anim_set_custom_exec_cb(&PropertyAnimation_0, _ui_anim_callback_set_image_frame);
     lv_anim_set_values(&PropertyAnimation_0, 0, 5);  // 6 frames (0-5) - reduced from 7 due to binary size

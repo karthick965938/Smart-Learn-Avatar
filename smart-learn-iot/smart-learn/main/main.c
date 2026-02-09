@@ -30,8 +30,12 @@
 #define LISTEN_SPEAK_PANEL_DELAY_MS     2000
 #define SERVER_ERROR                    "server_error"
 #define INVALID_REQUEST_ERROR           "invalid_request_error"
-#define SORRY_CANNOT_UNDERSTAND         "Sorry, I can't understand."
 #define API_KEY_NOT_VALID               "API Key is not valid"
+
+/* User-visible error hints (STT=transcription, KB=knowledge base) */
+#define MSG_STT_FAILED          "Speech recognition failed. Check API key, Base URL, and network."
+#define MSG_STT_ERROR           "Transcription error. Check API key and Base URL."
+#define MSG_KB_FAILED           "Knowledge base error. Check KB URL and network."
 
 static char *TAG = "app_main";
 static sys_param_t *sys_param = NULL;
@@ -190,7 +194,8 @@ esp_err_t start_openai(uint8_t *audio, int audio_len)
 
     if (NULL == text) {
         ret = ESP_ERR_INVALID_RESPONSE;
-        ui_ctrl_label_show_text(UI_CTRL_LABEL_LISTEN_SPEAK, INVALID_REQUEST_ERROR);
+        ESP_LOGW(TAG, "[STT] Transcription returned NULL. Check API key, Base URL, network, and audio.");
+        ui_ctrl_label_show_text(UI_CTRL_LABEL_LISTEN_SPEAK, MSG_STT_FAILED);
         ui_ctrl_show_panel(UI_CTRL_PANEL_SLEEP, LISTEN_SPEAK_PANEL_DELAY_MS);
         ESP_GOTO_ON_ERROR(ret, err, TAG, "[audioTranscription]: invalid url");
     }
@@ -204,7 +209,8 @@ esp_err_t start_openai(uint8_t *audio, int audio_len)
 
     if (strcmp(text, INVALID_REQUEST_ERROR) == 0 || strcmp(text, SERVER_ERROR) == 0) {
         ret = ESP_ERR_INVALID_RESPONSE;
-        ui_ctrl_label_show_text(UI_CTRL_LABEL_LISTEN_SPEAK, SORRY_CANNOT_UNDERSTAND);
+        ESP_LOGW(TAG, "[STT] Transcription error: %s (check API key and Base_url)", text);
+        ui_ctrl_label_show_text(UI_CTRL_LABEL_LISTEN_SPEAK, MSG_STT_ERROR);
         ui_ctrl_show_panel(UI_CTRL_PANEL_SLEEP, LISTEN_SPEAK_PANEL_DELAY_MS);
         ESP_GOTO_ON_ERROR(ret, err, TAG, "[audioTranscription]: invalid response");
     }
@@ -217,15 +223,16 @@ esp_err_t start_openai(uint8_t *audio, int audio_len)
     response = kb_chat_query(text);
     if (NULL == response) {
         ret = ESP_ERR_INVALID_RESPONSE;
-        ui_ctrl_label_show_text(UI_CTRL_LABEL_LISTEN_SPEAK, SORRY_CANNOT_UNDERSTAND);
+        ESP_LOGW(TAG, "[KB] kb_chat_query failed (NULL). Check KB_url and network.");
+        ui_ctrl_label_show_text(UI_CTRL_LABEL_LISTEN_SPEAK, MSG_KB_FAILED);
         ui_ctrl_show_panel(UI_CTRL_PANEL_SLEEP, LISTEN_SPEAK_PANEL_DELAY_MS);
         ESP_GOTO_ON_ERROR(ret, err, TAG, "[kb_chat_query]: invalid response");
     }
 
     if (response != NULL && (strcmp(response, INVALID_REQUEST_ERROR) == 0 || strcmp(response, SERVER_ERROR) == 0)) {
-        // UI listen fail
         ret = ESP_ERR_INVALID_RESPONSE;
-        ui_ctrl_label_show_text(UI_CTRL_LABEL_LISTEN_SPEAK, SORRY_CANNOT_UNDERSTAND);
+        ESP_LOGW(TAG, "[KB] Knowledge base returned error: %s. Check KB_url.", response);
+        ui_ctrl_label_show_text(UI_CTRL_LABEL_LISTEN_SPEAK, MSG_KB_FAILED);
         ui_ctrl_show_panel(UI_CTRL_PANEL_SLEEP, LISTEN_SPEAK_PANEL_DELAY_MS);
         ESP_GOTO_ON_ERROR(ret, err, TAG, "[chatCompletion]: invalid response");
     }
@@ -237,7 +244,7 @@ esp_err_t start_openai(uint8_t *audio, int audio_len)
 
     if (strcmp(response, INVALID_REQUEST_ERROR) == 0) {
         ret = ESP_ERR_INVALID_RESPONSE;
-        ui_ctrl_label_show_text(UI_CTRL_LABEL_LISTEN_SPEAK, SORRY_CANNOT_UNDERSTAND);
+        ui_ctrl_label_show_text(UI_CTRL_LABEL_LISTEN_SPEAK, MSG_KB_FAILED);
         ui_ctrl_show_panel(UI_CTRL_PANEL_SLEEP, LISTEN_SPEAK_PANEL_DELAY_MS);
         ESP_GOTO_ON_ERROR(ret, err, TAG, "[chatCompletion]: invalid response");
     }

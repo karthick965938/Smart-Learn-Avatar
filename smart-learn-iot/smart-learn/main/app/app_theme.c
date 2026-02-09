@@ -43,12 +43,14 @@ static void apply_theme_to_obj_recursive(lv_obj_t *obj, lv_color_t bg_color, lv_
 
     // 3. Handle Text Colors (including labels inside buttons)
     if (lv_obj_has_class(obj, &lv_label_class)) {
-        lv_obj_set_style_text_color(obj, text_color, 0);
+        // Special case: "Thinking ...", "Listening ...", and STT content labels 
+        // should stay #D24B09 as requested.
+        if (obj == ui_LabelListenSpeak || obj == ui_LabelReplyQuestion) {
+            lv_obj_set_style_text_color(obj, lv_color_hex(0xD24B09), 0);
+        } else {
+            lv_obj_set_style_text_color(obj, text_color, 0);
+        }
     }
-
-    // 3. Special case: Panels that should remain transparent (like PanelSetupWifi, PanelSleep etc)
-    // Squarespace code often sets bg_opa to 0 for these. We should respect that if it was intentionally 0.
-    // (Handled by if condition in step 1)
 
     // 4. Recurse to children
     uint32_t i;
