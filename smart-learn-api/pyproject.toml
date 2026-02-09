@@ -17,7 +17,8 @@ dependencies = [
     "httpx",
     "python-docx",
     "beautifulsoup4",
-    "pydantic-settings"
+    "pydantic-settings",
+    "esp-idf-nvs-partition-gen>=0.2.0"
 ]
 
 [tool.setuptools]

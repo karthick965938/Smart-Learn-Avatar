@@ -1,3 +1,4 @@
+import json
 import chromadb
 from chromadb.config import Settings as ChromaSettings
 from app.config import settings
@@ -14,9 +15,19 @@ def list_knowledge_bases() -> list[dict]:
         for col in collections:
             if col.name.startswith("kb_"):
                 kb_id = col.name[3:]
+                metadata = col.metadata or {}
+                # Robust boolean casting for the custom_instruction flag
+                raw_custom = metadata.get("custom_instruction", False)
+                custom_instruction = str(raw_custom).lower() in ["true", "1", "t", "yes", "y"] if not isinstance(raw_custom, bool) else raw_custom
+
                 kbs.append({
                     "id": kb_id,
-                    "name": col.metadata.get("name", kb_id) if col.metadata else kb_id
+                    "name": metadata.get("name", kb_id),
+                    "assistant_name": metadata.get("assistant_name", ""),
+                    "instruction": metadata.get("instruction", ""),
+                    "custom_instruction": custom_instruction,
+                    "conversation_types": _parse_conversation_types(metadata.get("conversation_types")),
+                    "document_count": len(list_documents(kb_id)),
                 })
         return kbs
     except Exception as e:
@@ -70,6 +81,13 @@ def list_documents(kb_id: str) -> list[str]:
             
     return list(filenames)
 
+def has_documents(kb_id: str) -> bool:
+    """
+    Check if a specific KB has any documents.
+    """
+    collection = get_collection(kb_id)
+    return collection.count() > 0
+
 def delete_document(kb_id: str, filename: str):
     """
     Delete all chunks associated with a specific filename in a KB.
@@ -88,19 +106,44 @@ def delete_knowledge_base(kb_id: str):
     except ValueError:
         pass  # Collection doesn't exist
 
-def set_kb_metadata(kb_id: str, name: str):
+def _parse_conversation_types(raw) -> list:
+    if isinstance(raw, list):
+        return raw
+    if isinstance(raw, str):
+        try:
+            return json.loads(raw)
+        except Exception:
+            return []
+    return []
+
+
+def set_kb_metadata(kb_id: str, name: str, assistant_name: str = None, instruction: str = None, custom_instruction: bool = False, conversation_types: list | None = None):
     """
-    Set the human-readable name for a knowledge base.
+    Set metadata for a knowledge base including name, assistant name, custom instruction, instruction text, and conversation_types.
     """
     collection = get_collection(kb_id)
-    collection.modify(metadata={"name": name})
+    metadata = {"name": name}
+    
+    if assistant_name is not None:
+        metadata["assistant_name"] = assistant_name
+    if instruction is not None:
+        metadata["instruction"] = instruction
+    
+    metadata["custom_instruction"] = custom_instruction
+
+    if conversation_types is not None:
+        metadata["conversation_types"] = json.dumps(conversation_types) if conversation_types else "[]"
+    
+    collection.modify(metadata=metadata)
 
 def get_kb_metadata(kb_id: str) -> dict:
     """
-    Get metadata for a knowledge base.
+    Get metadata for a knowledge base. conversation_types is parsed from JSON into a list.
     """
     collection = get_collection(kb_id)
-    return collection.metadata or {}
+    meta = dict(collection.metadata or {})
+    meta["conversation_types"] = _parse_conversation_types(meta.get("conversation_types"))
+    return meta
 
 # API Key Management
 def get_api_key_collection():

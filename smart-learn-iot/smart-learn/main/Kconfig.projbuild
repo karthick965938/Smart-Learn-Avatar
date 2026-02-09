@@ -1,0 +1,99 @@
+menu "Example Configuration"
+
+    config VOICE_ID
+        string "Speaker Id"
+        default "qiumum_0gushi"
+        help
+            speaker id from https://czyt.tech/post/a-free-tts-api/?from_wecom=1
+    config VOLUME_LEVEL
+        int "volume level"
+        default "90"
+        range 1 100
+        help
+            speaker volume
+    config MAX_TOKEN
+        int "Chat GPT Response Token"
+        default 500
+        range 1 2048
+        help
+            Chat GPT response token between 1 - 2048.
+
+    choice TTS_VOICE_SELECTION
+        prompt "TTS Voice Selection"
+        default TTS_VOICE_SHIMMER
+        help
+            Select the Text-to-Speech voice for OpenAI TTS.
+            Male voices: alloy, echo, onyx
+            Female voices: fable, nova, shimmer
+
+        config TTS_VOICE_ALLOY
+            bool "alloy (male)"
+        config TTS_VOICE_ECHO
+            bool "echo (male)"
+        config TTS_VOICE_ONYX
+            bool "onyx (male)"
+        config TTS_VOICE_FABLE
+            bool "fable (female)"
+        config TTS_VOICE_NOVA
+            bool "nova (female)"
+        config TTS_VOICE_SHIMMER
+            bool "shimmer (female)"
+    endchoice
+
+    config TTS_VOICE
+        string
+        default "alloy" if TTS_VOICE_ALLOY
+        default "echo" if TTS_VOICE_ECHO
+        default "onyx" if TTS_VOICE_ONYX
+        default "fable" if TTS_VOICE_FABLE
+        default "nova" if TTS_VOICE_NOVA
+        default "shimmer" if TTS_VOICE_SHIMMER
+
+    choice UI_THEME_SELECTION
+        prompt "UI Theme"
+        default UI_THEME_DARK
+        help
+            Select the UI theme for the application.
+
+        config UI_THEME_DARK
+            bool "Dark Theme"
+        config UI_THEME_LIGHT
+            bool "Light Theme"
+    endchoice
+
+    config UI_THEME_TYPE
+        int
+        default 0 if UI_THEME_DARK
+        default 1 if UI_THEME_LIGHT
+
+    config ESP_MAXIMUM_RETRY
+        int "Maximum retry"
+        default 5
+        help
+            Set the Maximum retry to avoid station reconnecting to the AP unlimited when the AP is really inexistent.
+
+    choice ESP_WIFI_SCAN_AUTH_MODE_THRESHOLD
+        prompt "WiFi Scan auth mode threshold"
+        default ESP_WIFI_AUTH_OPEN
+        help
+            The weakest authmode to accept in the scan mode.
+
+        config ESP_WIFI_AUTH_OPEN
+            bool "OPEN"
+        config ESP_WIFI_AUTH_WEP
+            bool "WEP"
+        config ESP_WIFI_AUTH_WPA_PSK
+            bool "WPA PSK"
+        config ESP_WIFI_AUTH_WPA2_PSK
+            bool "WPA2 PSK"
+        config ESP_WIFI_AUTH_WPA_WPA2_PSK
+            bool "WPA/WPA2 PSK"
+        config ESP_WIFI_AUTH_WPA3_PSK
+            bool "WPA3 PSK"
+        config ESP_WIFI_AUTH_WPA2_WPA3_PSK
+            bool "WPA2/WPA3 PSK"
+        config ESP_WIFI_AUTH_WAPI_PSK
+            bool "WAPI PSK"
+    endchoice
+
+endmenu
