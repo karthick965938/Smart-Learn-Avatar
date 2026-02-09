@@ -25,6 +25,3 @@ yarn-error.log*
 # System
 .DS_Store
 Thumbs.db
-
-# User specified directories
-smart-learn-web/
