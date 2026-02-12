@@ -4,6 +4,23 @@
 
 ---
 
+## 🎥 Demo Video
+
+[![Smart Learn Avatar Demo](https://img.youtube.com/vi/sbAEzvDquOA/0.jpg)](https://www.youtube.com/watch?v=sbAEzvDquOA)
+
+*Watch the full demonstration on YouTube: [AI Tutor Running on ESP32?! 🤯](https://www.youtube.com/watch?v=sbAEzvDquOA)*
+
+### 🚀 What's in the Video?
+- **Introduction**: Overview of the AI Tutor running on the ESP32-S3-BOX-3.
+- **Knowledge Base Creation**: Uploading documents and URLs to the web dashboard.
+- **IoT Setup**: Configuring WiFi and OpenAI keys directly from the browser.
+- **LVGL Avatar Animation**: Stunning real-time animations and lip-sync on the hardware.
+- **Real-time Interaction**: Full voice-to-voice conversation demo with the interactive tutor.
+
+---
+
+
+
 ## 🏗️ System Architecture
 
 The project is divided into three core components:
