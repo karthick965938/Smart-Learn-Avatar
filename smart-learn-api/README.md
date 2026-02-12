@@ -7,7 +7,11 @@
 
 **Smart Learn API** is a high-performance backend built with **FastAPI** that powers the Smart Learn Avatar ecosystem. It provides advanced RAG (Retrieval-Augmented Generation) capabilities, multi-tenant knowledge base management, and specialized tools for IoT device provisioning.
 
+> [!TIP]
+> **See it in action:** Check out the [Smart Learn Avatar Demo Video](https://www.youtube.com/watch?v=sbAEzvDquOA) to see how the API powers the interactive tutor.
+
 ---
+
 
 ## 🚀 Key Features
 

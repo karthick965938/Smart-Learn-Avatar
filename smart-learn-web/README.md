@@ -6,7 +6,10 @@
 
 **Smart Learn Web** is the interactive dashboard for the Smart Learn Avatar ecosystem. It provides a sleek, user-friendly interface to manage knowledge bases, configure AI personalities, and flash firmware directly to IoT devices (ESP32-S3-BOX-3) from the browser.
 
+[![Watch Demo](https://img.shields.io/badge/Demo-Watch%20Video-red?style=for-the-badge&logo=youtube)](https://www.youtube.com/watch?v=sbAEzvDquOA)
+
 ---
+
 
 ## 🚀 Key Features
 

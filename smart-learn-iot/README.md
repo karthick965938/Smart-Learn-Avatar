@@ -5,7 +5,10 @@
 
 **Smart Learn IoT** is the firmware powering the Smart Learn Avatar hardware. It transforms an **ESP32-S3-BOX-3** into a voice-interactive AI tutor that can talk to your custom knowledge bases in real-time.
 
+[![Video Demo](https://img.shields.io/badge/Demo-Voice%20Avatar-blue?style=for-the-badge&logo=youtube)](https://www.youtube.com/watch?v=sbAEzvDquOA)
+
 ---
+
 
 ## 🚀 Key Features
 
