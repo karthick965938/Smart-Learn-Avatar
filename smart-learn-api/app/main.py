@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from app.api.routes import router
+from app.api.xiaozhi_ws import router as xiaozhi_router
+from app.api.ota import router as ota_router
 from app.config import settings
 
 app = FastAPI(title=settings.PROJECT_NAME, description=settings.DESCRIPTION, version=settings.VERSION)
@@ -15,7 +17,10 @@ app.add_middleware(
 )
 
 app.include_router(router, prefix="/api/v1")
+app.include_router(xiaozhi_router)          # WebSocket: ws://host/ws/xiaozhi
+app.include_router(ota_router, prefix="/xiaozhi")  # OTA: POST /xiaozhi/ota/
 
 @app.get("/")
 async def root():
-    return {"message": "RAG SecuraAI API is running"}
+    return {"message": "Smart Learn API is running"}
+

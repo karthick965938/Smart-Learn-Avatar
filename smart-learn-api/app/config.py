@@ -11,9 +11,18 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "Smart Learn API"
     VERSION: str = "0.1.0"
     DESCRIPTION: str = "Smart Learn Avatar API application using FastAPI and ChromaDB"
-    KB_URL: str | None = None
+    KB_URL: str | None = None  # Legacy REST bypass (kept for compatibility)
+
+    # XiaoZhi voice assistant integration
+    # The KB endpoint to call for every voice query (your external RAG server)
+    KB_ENDPOINT: str = "http://18.234.117.250:5000/api/v1/kb/f9549db9/query"
+    # Public WebSocket URL returned to the ESP32 via the OTA endpoint.
+    # Set this to ws://<your-public-ip-or-domain>:<port>/ws/xiaozhi in .env
+    # If left empty, the OTA handler auto-detects from the incoming request host.
+    WS_PUBLIC_URL: str | None = None
 
     class Config:
         env_file = ".env"
 
 settings = Settings()
+
