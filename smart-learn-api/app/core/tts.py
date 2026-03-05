@@ -1,74 +1,64 @@
-import io
 import asyncio
 from openai import AsyncOpenAI
 from app.config import settings
+from app.core.ogg_utils import parse_ogg_packets
 
 client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
 
-# Default TTS voice — can be overridden via config
-TTS_VOICE = "alloy"
-
-
-async def text_to_opus(text: str, sample_rate: int = 16000) -> bytes:
+async def text_to_opus_frames(text: str, sample_rate: int = 16000, frame_duration_ms: int = 60) -> list[bytes]:
     """
-    Convert text to Opus audio bytes using OpenAI TTS + ffmpeg re-encode.
-    Returns raw Opus bytes (in an OGG container that ffmpeg can decode).
+    Convert text → individual raw Opus frames suitable for sending to ESP32.
+    Each returned bytes item = one WebSocket binary message = one Opus frame.
     """
     if not text.strip():
-        return b""
-
+        return []
     try:
-        # Step 1: Generate MP3 audio via OpenAI TTS
-        response = await client.audio.speech.create(
-            model="tts-1",
-            voice=TTS_VOICE,
-            input=text,
-            response_format="mp3",
+        # 1. OpenAI TTS → MP3
+        resp = await client.audio.speech.create(
+            model="tts-1", voice="alloy", input=text, response_format="mp3"
         )
-        mp3_bytes = response.content
+        mp3 = resp.content
+        print(f"[TTS] Got {len(mp3)} bytes of MP3 from OpenAI")
 
-        # Step 2: Re-encode MP3 → raw Opus frames via ffmpeg
-        # We output a raw opus stream that the WebSocket will send as binary frames
+        # 2. MP3 → OGG/Opus at device sample rate, with correct frame duration
+        ogg = await _mp3_to_ogg(mp3, sample_rate, frame_duration_ms)
+        if not ogg:
+            return []
+        print(f"[TTS] OGG encoded: {len(ogg)} bytes")
+
+        # 3. Parse OGG → individual Opus frames
+        frames = parse_ogg_packets(ogg)
+        print(f"[TTS] Parsed {len(frames)} Opus frames ({frame_duration_ms}ms @ {sample_rate}Hz)")
+        return frames
+
+    except Exception as e:
+        print(f"[TTS] Error: {e}")
+        return []
+
+async def _mp3_to_ogg(mp3: bytes, sample_rate: int, frame_duration_ms: int) -> bytes:
+    try:
         proc = await asyncio.create_subprocess_exec(
-            "ffmpeg",
-            "-i", "pipe:0",            # MP3 from stdin
-            "-f", "opus",              # output as raw opus
+            "ffmpeg", "-y",
+            "-i", "pipe:0",
+            "-f", "ogg",
+            "-acodec", "libopus",
             "-ar", str(sample_rate),
             "-ac", "1",
             "-b:a", "24k",
-            "pipe:1",                  # to stdout
-            stdin=asyncio.subprocess.PIPE,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.DEVNULL,
-        )
-        opus_bytes, _ = await proc.communicate(input=mp3_bytes)
-        return opus_bytes
-
-    except Exception as e:
-        print(f"[TTS] Error synthesizing speech: {e}")
-        return b""
-
-
-async def pcm_to_opus_frames(pcm_bytes: bytes, sample_rate: int = 16000, frame_duration_ms: int = 60) -> list[bytes]:
-    """
-    Split a PCM buffer into individual Opus frames of frame_duration_ms each.
-    """
-    try:
-        proc = await asyncio.create_subprocess_exec(
-            "ffmpeg",
-            "-f", "s16le", "-ar", str(sample_rate), "-ac", "1",
-            "-i", "pipe:0",
-            "-f", "opus", "-ar", str(sample_rate), "-ac", "1",
-            "-b:a", "24k",
+            "-frame_duration", str(frame_duration_ms),
             "pipe:1",
             stdin=asyncio.subprocess.PIPE,
             stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.DEVNULL,
+            stderr=asyncio.subprocess.PIPE,
         )
-        opus_data, _ = await proc.communicate(input=pcm_bytes)
-        frame_size = sample_rate * frame_duration_ms // 1000 * 2  # bytes per frame (16-bit PCM)
-        # Return the raw bytes as a single frame for simplicity
-        return [opus_data] if opus_data else []
+        ogg, err = await proc.communicate(input=mp3)
+        if proc.returncode != 0:
+            print(f"[TTS][ffmpeg] code={proc.returncode}: {err.decode(errors='replace')[-300:]}")
+            return b""
+        return ogg
+    except FileNotFoundError:
+        print("[TTS] ffmpeg not found")
+        return b""
     except Exception as e:
-        print(f"[TTS] Error converting PCM to Opus: {e}")
-        return []
+        print(f"[TTS] ffmpeg error: {e}")
+        return b""

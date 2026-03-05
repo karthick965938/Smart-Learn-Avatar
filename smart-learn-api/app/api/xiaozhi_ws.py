@@ -41,7 +41,7 @@ import httpx
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from app.core.stt import transcribe_opus
-from app.core.tts import text_to_opus
+from app.core.tts import text_to_opus_frames
 from app.config import settings
 
 router = APIRouter()
@@ -349,17 +349,14 @@ async def _run_pipeline(
 
         # 5. Generate and stream TTS audio ────────────────────────────────────
         print("[Pipeline] Step 3 ► TTS synthesis...")
-        opus_audio = await text_to_opus(answer, sample_rate=sample_rate)
+        frames = await text_to_opus_frames(answer, sample_rate=sample_rate, frame_duration_ms=frame_duration)
 
-        if opus_audio:
-            chunk_size = 4096
-            total_sent = 0
-            for i in range(0, len(opus_audio), chunk_size):
-                await websocket.send_bytes(opus_audio[i: i + chunk_size])
-                total_sent += len(opus_audio[i: i + chunk_size])
-            print(f"[Pipeline] Streamed {total_sent} bytes of TTS audio")
+        if frames:
+            for frame in frames:
+                await websocket.send_bytes(frame)
+            print(f"[Pipeline] Sent {len(frames)} Opus frames to device")
         else:
-            print("[Pipeline] TTS produced no audio")
+            print("[Pipeline] TTS produced no frames")
 
         # 6. TTS stop ─────────────────────────────────────────────────────────
         await _safe_send(websocket, {"type": "tts", "state": "stop"})
