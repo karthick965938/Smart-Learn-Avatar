@@ -1,0 +1,63 @@
+menu "Custom ESP32-S3 Board"
+
+    config BOARD_I2C_SDA_GPIO
+        int "I2C SDA GPIO (OLED)"
+        default 17
+
+    config BOARD_I2C_SCL_GPIO
+        int "I2C SCL GPIO (OLED)"
+        default 18
+
+    config BOARD_OLED_I2C_ADDR
+        hex "SH1106 I2C address"
+        default 0x3C
+
+    config BOARD_I2S_MIC_BCLK_GPIO
+        int "INMP441 BCLK GPIO"
+        default 4
+
+    config BOARD_I2S_MIC_WS_GPIO
+        int "INMP441 WS/LRC GPIO"
+        default 5
+
+    config BOARD_I2S_MIC_DIN_GPIO
+        int "INMP441 DOUT GPIO"
+        default 6
+
+    config BOARD_I2S_SPK_BCLK_GPIO
+        int "MAX98357 BCLK GPIO"
+        default 15
+
+    config BOARD_I2S_SPK_WS_GPIO
+        int "MAX98357 LRC GPIO"
+        default 16
+
+    config BOARD_I2S_SPK_DOUT_GPIO
+        int "MAX98357 DIN GPIO"
+        default 7
+
+    config BOARD_RFID_SPI_HOST
+        int "RC522 SPI host (SPI2_HOST=1, SPI3_HOST=2)"
+        default 1
+
+    config BOARD_RFID_CS_GPIO
+        int "RC522 CS/SDA GPIO"
+        default 10
+
+    config BOARD_RFID_RST_GPIO
+        int "RC522 RST GPIO"
+        default 14
+
+    config BOARD_RFID_MOSI_GPIO
+        int "RC522 MOSI GPIO"
+        default 11
+
+    config BOARD_RFID_MISO_GPIO
+        int "RC522 MISO GPIO"
+        default 13
+
+    config BOARD_RFID_SCK_GPIO
+        int "RC522 SCK GPIO"
+        default 12
+
+endmenu

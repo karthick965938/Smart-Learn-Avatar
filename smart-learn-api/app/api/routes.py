@@ -10,6 +10,14 @@ from app.core.embedding import get_embeddings, get_embedding
 from app.core.database import add_documents, query_documents, list_documents, delete_document, delete_knowledge_base, set_kb_metadata, get_kb_metadata, list_knowledge_bases, get_collection
 from app.core.llm import generate_response
 from app.config import settings
+from app.core.rfid import (
+    list_rfid_cards,
+    get_rfid_card,
+    upsert_rfid_card,
+    delete_rfid_card,
+    record_rfid_scan,
+    get_scan_events_since,
+)
 
 router = APIRouter()
 
@@ -402,5 +410,83 @@ async def generate_nvs_endpoint(request: NvsConfigRequest):
         raise HTTPException(status_code=500, detail=f"NVS Generation Error: {str(e)}")
 
 
+class RfidScanRequest(BaseModel):
+    uid: str
+
+
+class RfidCardRequest(BaseModel):
+    uid: str
+    kb_id: str
+    label: str = ""
+
+
+class RfidCardResponse(BaseModel):
+    uid: str
+    kb_id: str
+    kb_name: str = ""
+    label: str = ""
+    created_at: int = 0
+    updated_at: int = 0
+
+
+class RfidScanEventResponse(BaseModel):
+    id: int
+    uid: str
+    assigned: bool
+    kb_id: str | None = None
+    kb_name: str | None = None
+    kb_url: str | None = None
+    timestamp: int
+
+
+@router.post("/iot/rfid/scan", response_model=RfidScanEventResponse)
+async def rfid_scan(request: RfidScanRequest):
+    """
+    Called by the IoT device when an RFID card is scanned.
+    Returns assignment status and queues an event for the web dashboard.
+    """
+    try:
+        event = record_rfid_scan(request.uid)
+        return RfidScanEventResponse(**event)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/iot/rfid/events")
+async def rfid_scan_events(since: int = 0):
+    """
+    Poll for RFID scan events since the given event id (for web dashboard popups).
+    """
+    events = get_scan_events_since(since)
+    return {"events": events}
+
+
+@router.get("/iot/rfid/cards", response_model=list[RfidCardResponse])
+async def rfid_list_cards():
+    return [RfidCardResponse(**card) for card in list_rfid_cards()]
+
+
+@router.post("/iot/rfid/cards", response_model=RfidCardResponse)
+async def rfid_assign_card(request: RfidCardRequest):
+    try:
+        card = upsert_rfid_card(request.uid, request.kb_id, request.label)
+        return RfidCardResponse(**card)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.delete("/iot/rfid/cards/{uid}")
+async def rfid_delete_card(uid: str):
+    if not delete_rfid_card(uid):
+        raise HTTPException(status_code=404, detail="RFID card not found")
+    return {"message": f"RFID card {uid.upper()} removed"}
+
+
+@router.get("/iot/rfid/cards/{uid}", response_model=RfidCardResponse)
+async def rfid_get_card(uid: str):
+    card = get_rfid_card(uid)
+    if not card:
+        raise HTTPException(status_code=404, detail="RFID card not found")
+    return RfidCardResponse(**card)
 
 

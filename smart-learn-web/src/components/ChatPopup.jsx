@@ -2,53 +2,77 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ChatBubbleLeftRightIcon, PaperAirplaneIcon, XMarkIcon, MinusIcon, UserIcon, CpuChipIcon } from '@heroicons/react/24/solid';
 import { queryKB } from '../api';
 
-const ChatPopup = ({ activeKbId, kbName, showMessage }) => {
-    const [isOpen, setIsOpen] = useState(false);
+const ChatPopup = ({
+    activeKbId,
+    kbName,
+    showMessage,
+    isOpen: controlledOpen,
+    onOpenChange,
+    forceKbId,
+    forceKbName,
+}) => {
+    const [internalOpen, setInternalOpen] = useState(false);
+    const isControlled = controlledOpen !== undefined;
+    const isOpen = isControlled ? controlledOpen : internalOpen;
+    const setIsOpen = (value) => {
+        if (isControlled) {
+            onOpenChange?.(value);
+        } else {
+            setInternalOpen(value);
+        }
+    };
+
+    const effectiveKbId = forceKbId || activeKbId;
+    const effectiveKbName = forceKbName || kbName;
+
     const [isMinimized, setIsMinimized] = useState(false);
     const [query, setQuery] = useState('');
-    const [messages, setMessages] = useState([
-        { role: 'assistant', content: `Hello! I am your ${kbName || 'AI'} assistant. Ask me anything about your documents.` }
-    ]);
+    const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(false);
     const messagesEndRef = useRef(null);
 
     const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
 
-    // Update welcome message when KB changes
     useEffect(() => {
-        if (kbName) {
+        if (effectiveKbName) {
             setMessages([
-                { role: 'assistant', content: `Hello! I am your ${kbName} assistant. Ask me anything about your documents.` }
+                {
+                    role: 'assistant',
+                    content: `Hello! I am your ${effectiveKbName} assistant. Ask me anything about your documents.`,
+                },
             ]);
         }
-    }, [kbName]);
+    }, [effectiveKbName, effectiveKbId]);
 
     const handleQuery = async () => {
         if (!query.trim()) return;
-        if (!activeKbId) {
-            showMessage("Please select a Knowledge Base first.", "error");
+        if (!effectiveKbId) {
+            showMessage('Please select a Knowledge Base first.', 'error');
             return;
         }
 
         const userMessage = { role: 'user', content: query };
-        setMessages(prev => [...prev, userMessage]);
+        setMessages((prev) => [...prev, userMessage]);
         setQuery('');
         setLoading(true);
 
         try {
-            const res = await queryKB(activeKbId, userMessage.content);
+            const res = await queryKB(effectiveKbId, userMessage.content);
             const answer = res.data.answer;
-            setMessages(prev => [...prev, { role: 'assistant', content: answer }]);
+            setMessages((prev) => [...prev, { role: 'assistant', content: answer }]);
         } catch (error) {
             console.error(error);
             showMessage('Error fetching answer.', 'error');
-            setMessages(prev => [...prev, { role: 'assistant', content: "I'm sorry, I encountered an error trying to answer that." }]);
+            setMessages((prev) => [
+                ...prev,
+                { role: 'assistant', content: "I'm sorry, I encountered an error trying to answer that." },
+            ]);
         } finally {
             setLoading(false);
         }
@@ -63,7 +87,6 @@ const ChatPopup = ({ activeKbId, kbName, showMessage }) => {
 
     return (
         <>
-            {/* Floating Chat Button */}
             {!isOpen && (
                 <button
                     onClick={() => setIsOpen(true)}
@@ -75,20 +98,19 @@ const ChatPopup = ({ activeKbId, kbName, showMessage }) => {
                 </button>
             )}
 
-            {/* Chat Popup */}
             {isOpen && (
                 <div
-                    className={`fixed bottom-6 right-6 z-50 bg-gray-900 rounded-2xl shadow-2xl border-2 border-[#04B900] transition-all duration-300 ${isMinimized ? 'w-80 h-16' : 'w-96 h-[600px]'
-                        } flex flex-col`}
+                    className={`fixed bottom-6 right-6 z-50 bg-gray-900 rounded-2xl shadow-2xl border-2 border-[#04B900] transition-all duration-300 ${
+                        isMinimized ? 'w-80 h-16' : 'w-96 h-[600px]'
+                    } flex flex-col`}
                 >
-                    {/* Header */}
                     <div className="flex items-center justify-between p-4 border-b border-gray-800 bg-gradient-to-r from-[#04B900] to-[#04B900]/80 rounded-t-2xl">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
                                 <CpuChipIcon className="w-6 h-6 text-white" />
                             </div>
                             <div>
-                                <h3 className="font-semibold text-white">{kbName || 'AI Assistant'}</h3>
+                                <h3 className="font-semibold text-white">{effectiveKbName || 'AI Assistant'}</h3>
                                 <p className="text-xs text-white/80 flex items-center gap-1">
                                     <span className="w-2 h-2 rounded-full bg-white"></span>
                                     Online
@@ -99,7 +121,7 @@ const ChatPopup = ({ activeKbId, kbName, showMessage }) => {
                             <button
                                 onClick={() => setIsMinimized(!isMinimized)}
                                 className="p-2 rounded-lg hover:bg-white/20 transition-colors"
-                                title={isMinimized ? "Maximize" : "Minimize"}
+                                title={isMinimized ? 'Maximize' : 'Minimize'}
                             >
                                 <MinusIcon className="w-5 h-5 text-white" />
                             </button>
@@ -113,27 +135,31 @@ const ChatPopup = ({ activeKbId, kbName, showMessage }) => {
                         </div>
                     </div>
 
-                    {/* Messages Area */}
                     {!isMinimized && (
                         <>
                             <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-900">
                                 {messages.map((msg, idx) => (
                                     <div key={idx} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                                        <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center ${msg.role === 'user' ? 'bg-[#A0CCE5]' : 'bg-[#04B900]'
-                                            }`}>
-                                            {msg.role === 'user' ?
-                                                <UserIcon className="w-5 h-5 text-white" /> :
+                                        <div
+                                            className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center ${
+                                                msg.role === 'user' ? 'bg-[#A0CCE5]' : 'bg-[#04B900]'
+                                            }`}
+                                        >
+                                            {msg.role === 'user' ? (
+                                                <UserIcon className="w-5 h-5 text-white" />
+                                            ) : (
                                                 <CpuChipIcon className="w-5 h-5 text-white" />
-                                            }
+                                            )}
                                         </div>
 
-                                        <div className={`max-w-[75%] rounded-2xl px-4 py-3 shadow-sm ${msg.role === 'user'
-                                                ? 'bg-gray-800 text-white rounded-tr-none'
-                                                : 'bg-gray-900 text-white border border-gray-800 rounded-tl-none'
-                                            }`}>
-                                            <p className="whitespace-pre-wrap leading-relaxed text-sm">
-                                                {msg.content}
-                                            </p>
+                                        <div
+                                            className={`max-w-[75%] rounded-2xl px-4 py-3 shadow-sm ${
+                                                msg.role === 'user'
+                                                    ? 'bg-gray-800 text-white rounded-tr-none'
+                                                    : 'bg-gray-900 text-white border border-gray-800 rounded-tl-none'
+                                            }`}
+                                        >
+                                            <p className="whitespace-pre-wrap leading-relaxed text-sm">{msg.content}</p>
                                         </div>
                                     </div>
                                 ))}
@@ -153,7 +179,6 @@ const ChatPopup = ({ activeKbId, kbName, showMessage }) => {
                                 <div ref={messagesEndRef} />
                             </div>
 
-                            {/* Input Area */}
                             <div className="p-4 bg-gray-900 border-t border-gray-800 rounded-b-2xl">
                                 <div className="relative flex items-center">
                                     <input

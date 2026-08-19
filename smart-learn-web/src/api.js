@@ -46,4 +46,16 @@ export const generateNvs = (config) => api.post('/iot/generate-nvs', config, {
     responseType: 'arraybuffer'
 });
 
+export const rfidScan = (uid) => api.post('/iot/rfid/scan', { uid });
+
+export const listRfidCards = () => api.get('/iot/rfid/cards');
+
+export const assignRfidCard = (uid, kb_id, label = '') =>
+    api.post('/iot/rfid/cards', { uid, kb_id, label });
+
+export const deleteRfidCard = (uid) => api.delete(`/iot/rfid/cards/${uid}`);
+
+export const getRfidEvents = (since = 0) =>
+    api.get('/iot/rfid/events', { params: { since } });
+
 export default api;

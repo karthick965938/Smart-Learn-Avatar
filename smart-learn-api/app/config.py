@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     VERSION: str = "0.1.0"
     DESCRIPTION: str = "Smart Learn Avatar API application using FastAPI and ChromaDB"
     KB_URL: str | None = None
+    API_BASE_URL: str = "http://172.22.200.239:5000"
 
     class Config:
         env_file = ".env"

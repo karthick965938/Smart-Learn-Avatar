@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { PlusIcon, SparklesIcon, CpuChipIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline';
+import React, { useState, useEffect, useRef } from 'react';
+import { PlusIcon, SparklesIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline';
 import KnowledgeBaseCard from './components/KnowledgeBaseCard';
 import DocumentModal from './components/DocumentModal';
 import ChatPopup from './components/ChatPopup';
 import FlashMessage from './components/FlashMessage';
 import AiSetup from './components/AiSetup';
 import IoTSetup from './components/IoTSetup';
-import { listKBs, createKB, deleteKB } from './api';
+import RfidScanPopup from './components/RfidScanPopup';
+import { listKBs, createKB, deleteKB, getRfidEvents } from './api';
 
 function App() {
   const [flash, setFlash] = useState({ message: '', type: '' });
@@ -18,6 +19,10 @@ function App() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isAiSetupOpen, setIsAiSetupOpen] = useState(false);
   const [isIoTSetupOpen, setIsIoTSetupOpen] = useState(false);
+  const [rfidScanEvent, setRfidScanEvent] = useState(null);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatKbOverride, setChatKbOverride] = useState(null);
+  const lastEventIdRef = useRef(0);
 
   const showMessage = (message, type = 'success') => {
     setFlash({ message, type });
@@ -89,6 +94,47 @@ function App() {
     fetchKBs();
   }, []);
 
+  useEffect(() => {
+    const pollEvents = async () => {
+      try {
+        const res = await getRfidEvents(lastEventIdRef.current);
+        const events = res.data?.events || [];
+          if (events.length > 0) {
+          const latest = events[events.length - 1];
+          lastEventIdRef.current = latest.id;
+
+          if (latest.assigned && latest.kb_id) {
+            setChatKbOverride({ kbId: latest.kb_id, kbName: latest.kb_name });
+            setActiveKbId(latest.kb_id);
+            setIsChatOpen(true);
+            setRfidScanEvent(null);
+          } else {
+            setRfidScanEvent(latest);
+          }
+        }
+      } catch (error) {
+        console.debug('RFID event poll error:', error);
+      }
+    };
+
+    pollEvents();
+    const interval = setInterval(pollEvents, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleRfidOpenChat = ({ kbId, kbName }) => {
+    setChatKbOverride({ kbId, kbName });
+    setActiveKbId(kbId);
+    setIsChatOpen(true);
+  };
+
+  const handleChatClose = (open) => {
+    setIsChatOpen(open);
+    if (!open) {
+      setChatKbOverride(null);
+    }
+  };
+
   const activeKb = kbs.find(kb => kb.id === activeKbId);
 
   return (
@@ -104,7 +150,7 @@ function App() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-white tracking-tight">Smart Learn Avatar</h1>
-              <p className="text-sm text-gray-400 mt-1">Manage your knowledge bases — the gateway to your ESP32-S3-BOX-3</p>
+              <p className="text-sm text-gray-400 mt-1">Manage knowledge bases and RFID card assignments</p>
             </div>
             <div className="flex items-center gap-3">
               <button
@@ -173,13 +219,23 @@ function App() {
         onDocumentsChange={fetchKBs}
       />
 
-      {kbs.length > 0 && (
-        <ChatPopup
-          activeKbId={activeKbId}
-          kbName={activeKb?.name}
-          showMessage={showMessage}
-        />
-      )}
+      <ChatPopup
+        activeKbId={activeKbId}
+        kbName={activeKb?.name}
+        showMessage={showMessage}
+        isOpen={isChatOpen}
+        onOpenChange={handleChatClose}
+        forceKbId={chatKbOverride?.kbId}
+        forceKbName={chatKbOverride?.kbName}
+      />
+
+      <RfidScanPopup
+        event={rfidScanEvent}
+        kbs={kbs}
+        onClose={() => setRfidScanEvent(null)}
+        onOpenChat={handleRfidOpenChat}
+        showMessage={showMessage}
+      />
 
       <AiSetup
         isOpen={isAiSetupOpen}
@@ -194,6 +250,7 @@ function App() {
         onClose={() => setIsIoTSetupOpen(false)}
         showMessage={showMessage}
         kbs={kbs}
+        onCardsChange={() => {}}
       />
 
       {isCreateModalOpen && (

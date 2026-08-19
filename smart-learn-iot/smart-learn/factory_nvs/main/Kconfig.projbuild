@@ -2,17 +2,17 @@ menu "Example Configuration"
 
     config ESP_WIFI_SSID
         string "WiFi SSID"
-        default "My Network SSID"
+        default "FTTH-F8D0"
         help
             SSID (network name) for the example to connect to.
     config ESP_WIFI_PASSWORD
         string "WiFi Password"
-        default "My Password"
+        default "12345678"
         help
             WiFi password (WPA or WPA2) for the example to use.
     config OPENAI_API_KEY
         string "OpenAI Key"
-        default "sk-xxxxxxxx"
+        default "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"
         help
             OpenAI api key for the example to use.
     config OPENAI_URL
@@ -22,7 +22,7 @@ menu "Example Configuration"
             Base URL for OpenAI API
     config KB_URL
         string "Knowledge Base URL"
-        default "http://18.234.117.250:5000/api/v1/kb/xxxxxxxx/query"
+        default "http://172.22.200.239:5000/api/v1/kb/xxxxxxxx/query"
         help
             Knowledge Base URL for the application
 
