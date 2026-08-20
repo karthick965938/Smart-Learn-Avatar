@@ -124,7 +124,7 @@ const DocumentManager = ({ showMessage, activeKbId }) => {
                         </div>
                         <h3 className="text-lg font-medium text-gray-900">No documents yet</h3>
                         <p className="text-gray-500 max-w-sm mt-2">
-                            Upload PDF, TXT files or add URLs to train your AI assistant using the buttons above.
+                            Upload PDF, TXT, DOCX, CSV, images, or add URLs to train your AI assistant using the buttons above.
                         </p>
                     </div>
                 )}
@@ -182,6 +182,7 @@ const DocumentManager = ({ showMessage, activeKbId }) => {
                     <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-blue-500 transition-colors cursor-pointer relative group">
                         <input
                             type="file"
+                            accept=".pdf,.txt,.docx,.csv,.png,.jpg,.jpeg,.webp,.gif"
                             onChange={(e) => setUploadFile(e.target.files[0])}
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                             required
@@ -191,7 +192,7 @@ const DocumentManager = ({ showMessage, activeKbId }) => {
                             <p className="text-sm font-medium text-gray-900">
                                 {uploadFile ? uploadFile.name : "Click to select or drag file here"}
                             </p>
-                            <p className="text-xs text-gray-500 mt-1">PDF, TXT, MD up to 10MB</p>
+                            <p className="text-xs text-gray-500 mt-1">PDF, TXT, DOCX, CSV, PNG, JPG, WEBP, GIF up to 10MB</p>
                         </div>
                     </div>
                     <div className="flex justify-end gap-3 pt-4">

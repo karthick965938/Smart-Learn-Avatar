@@ -138,7 +138,7 @@ const DocumentModal = ({ isOpen, onClose, kbId, kbName, showMessage, onDocuments
                             </div>
                             <h3 className="text-lg font-medium text-white">No documents yet</h3>
                             <p className="text-gray-400 max-w-sm mt-2">
-                                Upload PDF, TXT files or add URLs to train your AI assistant.
+                                Upload PDF, TXT, DOCX, CSV, images, or add URLs to train your AI assistant.
                             </p>
                         </div>
                     )}
@@ -184,6 +184,7 @@ const DocumentModal = ({ isOpen, onClose, kbId, kbName, showMessage, onDocuments
                                 <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-[#04B900] transition-colors cursor-pointer relative group">
                                     <input
                                         type="file"
+                                        accept=".pdf,.txt,.docx,.csv,.png,.jpg,.jpeg,.webp,.gif"
                                         onChange={(e) => setUploadFile(e.target.files[0])}
                                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                         required
@@ -192,7 +193,7 @@ const DocumentModal = ({ isOpen, onClose, kbId, kbName, showMessage, onDocuments
                                     <p className="text-sm font-medium text-white">
                                         {uploadFile ? uploadFile.name : "Click to select or drag file here"}
                                     </p>
-                                    <p className="text-xs text-gray-500 mt-1">PDF, TXT, DOCX up to 10MB</p>
+                                    <p className="text-xs text-gray-500 mt-1">PDF, TXT, DOCX, CSV, PNG, JPG, WEBP, GIF up to 10MB</p>
                                 </div>
                                 <div className="flex justify-end gap-2">
                                     <button

@@ -1,0 +1,16 @@
+profiles:
+  default:
+    fqbn: 
+    platforms:
+      - platform: arduino:zephyr
+    libraries:
+      - dependency: AES_CMAC (1.0.0)
+      - dependency: CRC32 (2.0.1)
+      - dependency: CryptoAES_CBC (1.0.0)
+      - dependency: MFRC522 (1.4.12)
+      - MFRC522_NTAG424DNA (1.0.1)
+      - dependency: Adafruit BusIO (1.17.4)
+      - Adafruit GFX Library (1.12.6)
+      - Adafruit SH110X (2.1.15)
+
+default_profile: default
