@@ -6,7 +6,7 @@ from pathlib import Path
 from app.config import settings
 from app.core.database import get_kb_metadata, list_knowledge_bases
 
-RFID_STORE_PATH = Path("./data/rfid_cards.json")
+RFID_STORE_PATH = Path(__file__).resolve().parent.parent.parent / "data" / "rfid_cards.json"
 
 _lock = threading.Lock()
 _event_lock = threading.Lock()

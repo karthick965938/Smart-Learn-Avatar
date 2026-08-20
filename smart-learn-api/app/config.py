@@ -1,9 +1,14 @@
-import os
-from pydantic_settings import BaseSettings
+from pathlib import Path
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+ENV_FILE = PROJECT_ROOT / ".env"
+
 
 class Settings(BaseSettings):
     OPENAI_API_KEY: str
-    CHROMA_DB_PATH: str = "./chroma_db"
+    CHROMA_DB_PATH: str = str(PROJECT_ROOT / "chroma_db")
     EMBEDDING_MODEL: str = "text-embedding-3-small"
     LLM_MODEL: str = "gpt-4o-mini"
     CHUNK_SIZE: int = 1000
@@ -14,7 +19,7 @@ class Settings(BaseSettings):
     KB_URL: str | None = None
     API_BASE_URL: str = "http://172.22.200.239:5000"
 
-    class Config:
-        env_file = ".env"
+    model_config = SettingsConfigDict(env_file=str(ENV_FILE), extra="ignore")
+
 
 settings = Settings()
