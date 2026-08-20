@@ -1,52 +1,47 @@
 import requests
 
-from arduino.app_utils import Bridge, App
-
-
-# ============================================
-# API CONFIGURATION
-# ============================================
+from arduino.app_utils import App, Bridge
 
 API_URL = "http://44.214.74.118:5000/api/v1/iot/rfid/scan"
+TIMEOUT_SEC = 5
 
 
-# ============================================
-# RFID HANDLER
-# ============================================
+def _empty_result(uid: str) -> dict:
+    return {"ok": "0", "assigned": "0", "kb_name": "", "uid": uid}
 
-def rfid_detected(uid):
 
-    print("RFID detected:", uid)
-    print("Calling API:", API_URL)
+def rfid_detected(uid: str) -> dict:
+    """Post RFID scan to API and return status for the OLED."""
+    print(f"RFID detected: {uid}")
 
     try:
-
         response = requests.post(
             API_URL,
-            json={
-                "uid": uid
-            },
-            timeout=5
+            json={"uid": uid},
+            timeout=TIMEOUT_SEC,
         )
+        print(f"API status: {response.status_code}")
+        print(f"API response: {response.text}")
 
-        print("API status:", response.status_code)
-        print("API response:", response.text)
+        if not response.ok:
+            return _empty_result(uid)
 
-        if response.ok:
-            return True
+        data = response.json()
+        kb_name = data.get("kb_name") or ""
+        if not isinstance(kb_name, str):
+            kb_name = ""
 
-        return False
+        return {
+            "ok": "1",
+            "assigned": "1" if data.get("assigned") else "0",
+            "kb_name": kb_name,
+            "uid": uid,
+        }
 
-    except Exception as e:
-
-        print("API error:", e)
-
-        return False
+    except Exception as error:
+        print(f"API error: {error}")
+        return _empty_result(uid)
 
 
-# Register the function so Arduino can call it
 Bridge.provide("rfid_detected", rfid_detected)
-
-
-# Keep the Python application running
 App.run()
