@@ -164,7 +164,9 @@ curl -X DELETE http://localhost:5000/api/v1/kb/f8e2a1b0
 
 ### `POST /api/v1/kb/{kb_id}/ingest`
 
-Upload a document for background ingestion. Supported formats: PDF, DOCX, CSV, TXT.
+Upload a document for background ingestion. Supported formats: PDF, DOCX, CSV, TXT, PNG, JPG, JPEG, WEBP, GIF (max 10MB).
+
+Images are processed with GPT-4o-mini vision (`detail: low`) to extract text and visual descriptions, then embedded with `text-embedding-3-small`.
 
 **Request:** `multipart/form-data` with field `file`
 

@@ -63,16 +63,18 @@ LLM_MODEL=gpt-4o-mini
 
 ### 3. Installation & Run
 
-#### **Option A: Using `uv` (Recommended)**
+#### **Option A: Using `pip` (Recommended)**
 ```bash
-# Install dependencies and run
-uvicorn app.main:app --reload --port 5000
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload --host 0.0.0.0 --port 5000
 ```
 
-#### **Option B: Using `pip`**
+#### **Option B: Using `uv`**
 ```bash
-pip install -e .
-uvicorn app.main:app --reload --port 5000
+uv sync
+uvicorn app.main:app --reload --host 0.0.0.0 --port 5000
 ```
 
 #### **Option C: Using Docker**

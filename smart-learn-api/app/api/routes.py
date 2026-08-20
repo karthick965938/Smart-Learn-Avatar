@@ -299,7 +299,7 @@ async def process_file(kb_id: str, file_content: bytes, filename: str, filename_
 @router.post("/kb/{kb_id}/ingest")
 async def ingest_document(kb_id: str, background_tasks: BackgroundTasks, file: UploadFile = File(...)):
     """
-    Upload a document (PDF, CSV, TXT) for background ingestion into a specific KB.
+    Upload a document (PDF, CSV, TXT, DOCX, PNG, JPG, WEBP, GIF) for background ingestion into a specific KB.
     """
     # Read file content before passing to background task (file handle will be closed after this endpoint returns)
     file_content = await file.read()

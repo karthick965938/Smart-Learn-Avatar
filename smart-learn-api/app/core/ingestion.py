@@ -1,9 +1,22 @@
 import io
+import base64
 import pandas as pd
 import httpx
 from bs4 import BeautifulSoup
 from pypdf import PdfReader
 from fastapi import UploadFile, HTTPException
+from openai import AsyncOpenAI
+
+from app.config import settings
+
+IMAGE_EXTENSIONS = (".png", ".jpg", ".jpeg", ".webp", ".gif")
+IMAGE_MEDIA_TYPES = {
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".webp": "image/webp",
+    ".gif": "image/gif",
+}
 
 async def extract_text(file: UploadFile) -> str:
     content = await file.read()
@@ -17,6 +30,8 @@ async def extract_text(file: UploadFile) -> str:
         return extract_text_from_txt(content)
     elif filename.endswith(".docx"):
         return extract_text_from_docx(content)
+    elif filename.endswith(IMAGE_EXTENSIONS):
+        return await extract_text_from_image(content, filename)
     else:
         raise HTTPException(status_code=400, detail="Unsupported file type")
 
@@ -50,6 +65,55 @@ def extract_text_from_docx(content: bytes) -> str:
         return "\n".join([para.text for para in doc.paragraphs])
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error extracting text from DOCX: {str(e)}")
+
+async def extract_text_from_image(content: bytes, filename: str) -> str:
+    """Use GPT-4o-mini vision (low detail) to extract text/description, then embed as text."""
+    ext = "." + filename.rsplit(".", 1)[-1] if "." in filename else ""
+    media_type = IMAGE_MEDIA_TYPES.get(ext)
+    if not media_type:
+        raise HTTPException(status_code=400, detail="Unsupported image type")
+
+    if len(content) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Image must be 10MB or smaller")
+
+    try:
+        client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+        image_b64 = base64.standard_b64encode(content).decode("utf-8")
+        response = await client.chat.completions.create(
+            model=settings.LLM_MODEL,
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": (
+                                "Extract all readable text from this image. "
+                                "Also summarize charts, diagrams, labels, and other visual facts "
+                                "that would help answer questions about this image. "
+                                "Return plain text only."
+                            ),
+                        },
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:{media_type};base64,{image_b64}",
+                                "detail": "low",
+                            },
+                        },
+                    ],
+                }
+            ],
+            max_tokens=1200,
+        )
+        text = (response.choices[0].message.content or "").strip()
+        if not text:
+            raise HTTPException(status_code=400, detail="No text or visual content extracted from image")
+        return text
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error extracting text from image: {str(e)}")
 
 async def extract_text_from_url(url: str) -> str:
     try:
