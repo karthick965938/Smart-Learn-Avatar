@@ -130,7 +130,7 @@ void ui_ctrl_show_panel(ui_ctrl_panel_t panel, uint16_t timeout)
     s_panel = panel;
     switch (panel) {
     case UI_CTRL_PANEL_SLEEP:
-        strcpy(s_status_line, "Say 'Hi ESP' to ask");
+        strcpy(s_status_line, "Say 'Hi Json' to ask");
         break;
     case UI_CTRL_PANEL_LISTEN:
         strcpy(s_status_line, "Listening...");

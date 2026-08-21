@@ -170,7 +170,7 @@ Firstly, connect the RGB LED module to your device. Refer to the pin definitions
 <img src="./_static/_get_started_static/LED_pin_defination.png">
 </div>
 
-1. You may say `"Hi E. S. P." (pronounce in alphabet)` at any screen to wake up your device. When it wakes up, the screen will display the wake word you just used. If the wake word isn't displayed, give it another try. The screen below indicates your device is listening.
+1. You may say **"Hi Json"** at any screen to wake up your device. When it wakes up, the screen will display the wake word you just used. If the wake word isn't displayed, give it another try. The screen below indicates your device is listening.
 
 <div align="center">
 <img src="./_static/_get_started_static/17.png">
@@ -297,7 +297,7 @@ The ESP32-S3-BOX-3 is also equipped with Espressif proprietary AI Speech Recogni
    <img src="_static/_get_started_static/12.jpeg"width="300" />
    </div>
 
-2.5 Now, you can try out your new command! First, say `"Hi E. S. P."` to wake up your device. Then say `"Good Morning"` within 6 seconds to turn on the light. The new command will show on the screen with the module light turned on.
+2.5 Now, you can try out your new command! First, say **"Hi Json"** to wake up your device. Then say `"Good Morning"` within 6 seconds to turn on the light. The new command will show on the screen with the module light turned on.
 
    <div align="center">
    <img src="_static/_get_started_static/15.png">

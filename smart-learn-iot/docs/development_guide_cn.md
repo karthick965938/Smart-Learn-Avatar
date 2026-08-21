@@ -202,7 +202,7 @@ idf.py -p PORT flash monitor
   * 切换唤醒词和命令词模型
     ```
     /* 唤醒词模型切换 */
-    wn_name = esp_srmodel_filter(models, ESP_WN_PREFIX, (SR_LANG_EN == g_sr_data->lang ? "hiesp" : "hilexin"));
+    wn_name = esp_srmodel_filter(models, ESP_WN_PREFIX, (SR_LANG_EN == g_sr_data->lang ? "hijason" : "hilexin"));
     g_sr_data->afe_handle->set_wakenet(g_sr_data->afe_data, wn_name); //设置唤醒词模型
 
     /* 命令词模型切换 */

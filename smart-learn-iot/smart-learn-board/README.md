@@ -1,73 +1,56 @@
-# Smart Learn Board Firmware
+# Smart Learn Board Firmware (ESP32-S3 Mini — Voice)
 
-Firmware for a custom **ESP32-S3** board with:
+Voice firmware for **ESP32-S3 Mini**: built-in **microphone** and **audio amplifier**, external speaker, WiFi, wake word **"Hi Json"**, STT → KB query → TTS.
 
-- **INMP441** I2S microphone
-- **MAX98357A** I2S amplifier/speaker
-- **RC522** RFID reader (API-driven knowledge-base switching)
-- **SH1106** 128x64 OLED (simple text UI, no avatar)
+Pairs with **[Arduino UNO Q](../../smart-learn-uno-q/README.md)** (main board) for **RC522** RFID and **OLED** display, managed via **Smart Learn Web**.
 
-## Speech-to-Speech Flow
+## Speech flow
 
-1. Connect to WiFi using NVS credentials (one-time setup)
-2. Wake word **"Hi ESP"** starts listening
+1. Connect to WiFi (NVS credentials)
+2. Wake word **"Hi Json"** starts listening
 3. Speech → OpenAI Whisper STT
-4. Question → active Knowledge Base API (`POST /api/v1/kb/{id}/query`)
-5. Answer → OpenAI TTS → speaker + OLED
+4. Question → Knowledge Base API (`POST /api/v1/kb/{id}/query` from NVS `KB_url`)
+5. Answer → OpenAI TTS → speaker
 
-**RFID:** tapping a card calls `POST /api/v1/iot/rfid/scan` and switches the active KB URL from the API response.
+RFID card taps and KB selection on OLED are handled by **Arduino UNO Q** + **Smart Learn Web**.
 
 ## Quick Start
 
-See **[SETUP.md](./SETUP.md)** for full one-time configuration:
-
-- WiFi SSID / Password
-- OpenAI API Key
-- Default Knowledge Base URL
-- RFID card assignment via web dashboard
+See **[SETUP.md](./SETUP.md)** for NVS (WiFi, OpenAI key, `KB_url`).
 
 ```bash
-# 1. Build factory NVS (one-time credentials)
-cd ../smart-learn/factory_nvs && idf.py build
-
-# 2. Build and flash board firmware
-cd ../../smart-learn-board
+cd smart-learn-iot/smart-learn-board
 idf.py set-target esp32s3
 idf.py build flash monitor
 ```
 
-## Hardware wiring
+## Hardware highlights
 
-Full pin-by-pin tables: **[WIRING.md](./WIRING.md)**
+| Feature | Details |
+|---------|---------|
+| Microphone | Built-in on ESP32-S3 Mini |
+| Audio amplifier | Built-in + external speaker |
+| WiFi | ESP32-S3 wireless |
+| Wake word | **Hi Json** |
+| RAG queries | KB URL from NVS |
 
-| Component | Signal | GPIO |
-|-----------|--------|------|
-| INMP441 | BCLK / WS / DOUT | 4 / 5 / 6 |
-| MAX98357A | BCLK / LRC / DIN | 15 / 16 / 7 |
-| SH1106 | SDA / SCL | 17 / 18 |
-| RC522 | CS / MOSI / SCK / MISO / RST | 10 / 11 / 12 / 13 / 14 |
+RFID + OLED: **[Arduino UNO Q](../../smart-learn-uno-q/README.md)** — see UNO Q wiring guide.
 
-WiFi status is shown on the **OLED** (animated `Connecting WiFi...` → `WiFi connected` → `Say 'Hi ESP' to ask`). There is no separate WiFi LED on this board.
-
-Change pins in `idf.py menuconfig` → **Custom ESP32-S3 Board**.
-
-## NVS keys (one-time)
+## NVS keys
 
 | NVS key | Setting |
 |---------|---------|
-| `ssid` | WiFi SSID |
-| `password` | WiFi Password |
-| `ChatGPT_key` | OpenAI API Key |
+| `ssid` / `password` | WiFi |
+| `ChatGPT_key` | OpenAI API key |
 | `Base_url` | `https://api.openai.com/v1/` |
-| `KB_url` | Default KB query URL |
+| `KB_url` | KB query URL for voice |
 | `tts_voice` | e.g. `nova` (optional) |
 
-RFID card → KB mappings are managed via the **Smart Learn API / web dashboard** — not menuconfig.
+RFID card → KB map: **Smart Learn Web → IoT Setup** (UNO Q scans).
 
 ## Project layout
 
 ```text
-smart-learn-board/     # This firmware
-components/bsp-custom/ # INMP441, MAX98357, SH1106, RC522 drivers
-smart-learn/           # Original BOX-3 firmware + factory_nvs
+smart-learn-board/     # ESP32-S3 Mini voice firmware
+smart-learn-uno-q/     # Arduino UNO Q — RC522 + OLED (main board)
 ```

@@ -111,9 +111,9 @@ There is **no separate WiFi LED** on this board. WiFi status is shown on the **S
 | OLED text | Meaning |
 |-----------|---------|
 | `Connecting WiFi...` | Connecting (dots animate) |
-| `WiFi connected` | Connected — then shows `Say 'Hi ESP' to ask` |
+| `WiFi connected` | Connected — then shows `Say 'Hi Json' to ask` |
 | `WiFi failed` | Could not connect after retries |
-| `Say 'Hi ESP' to ask` | Ready for voice |
+| `Say 'Hi Json' to ask` | Ready for voice |
 
 Change GPIO pins in:
 

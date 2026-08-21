@@ -203,7 +203,7 @@ This section focuses on introducing some application interfaces of SR.
   * Switching Wake Word and Command Word Models
     ```
     /* Switching wake word model */
-    wn_name = esp_srmodel_filter(models, ESP_WN_PREFIX, (SR_LANG_EN == g_sr_data->lang ? "hiesp" : "hilexin"));
+    wn_name = esp_srmodel_filter(models, ESP_WN_PREFIX, (SR_LANG_EN == g_sr_data->lang ? "hijason" : "hilexin"));
     g_sr_data->afe_handle->set_wakenet(g_sr_data->afe_data, wn_name); // Set wake word model
 
     /* Switching command word model */

@@ -9,7 +9,7 @@ One-time device configuration and speech-to-speech flow for the **ESP32-S3 + RC5
 ```text
 1. Boot → read WiFi / OpenAI / default KB URL from NVS
 2. Connect WiFi
-3. Wait for wake word "Hi ESP"
+3. Wait for wake word "Hi Json"
 4. Record speech → OpenAI Whisper (STT)
 5. POST question to active Knowledge Base URL
 6. OpenAI TTS (tts-1) → speaker playback
@@ -221,7 +221,7 @@ The firmware updates the active KB URL from `kb_url` in this response.
 idf.py monitor
 ```
 
-4. Say **"Hi ESP"**, then ask a question
+4. Say **"Hi Json"**, then ask a question
 5. Watch serial logs:
 
 ```text
@@ -264,7 +264,7 @@ I (xxx) settings: Active KB switched to My KB (http://...)
 | `main/main.c` | STT → KB query → TTS pipeline |
 | `main/settings/settings.c` | NVS read + active KB URL management |
 | `main/app/app_rfid.c` | RFID scan → API → dynamic KB switch |
-| `main/app/app_sr.c` | Wake word "Hi ESP" |
+| `main/app/app_sr.c` | Wake word "Hi Json" |
 | `main/app/app_audio.c` | Record / playback |
 | `../smart-learn/factory_nvs/` | One-time NVS provisioning |
 
