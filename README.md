@@ -9,7 +9,7 @@
 | | |
 |---|---|
 | **📚 Multi-KB RAG** | Isolated knowledge bases with ChromaDB + GPT-4o-mini, grounded answers from your own content |
-| **🖼️ Image ingestion** | Upload PNG, JPG, WEBP, GIF — vision extraction then embedding with low-cost models |
+| **📄 Multi-format KBs** | Upload **PDF**, **DOCX**, **CSV**, **TXT**, URLs, and images (**PNG**, **JPG**, **WEBP**, **GIF**) — extracted, chunked, and embedded for RAG |
 | **📡 RFID hub** | Arduino UNO Q + RC522 + OLED — tap a card, assign KB in **Smart Learn Web** |
 | **🎙️ Voice assistant** | ESP32-S3 Mini — **"Hi Json"** wake word, STT, KB query, TTS on built-in audio |
 | **🌐 Web dashboard** | Manage KBs, documents, AI setup, RFID assignments, and chat preview |
