@@ -1,4 +1,4 @@
-name: Smart Learn 2.0
+name: Smart Learn
 description: "Main board app for Smart Learn — RC522 RFID card scans, OLED status display, and knowledge base assignment via Smart Learn Web and API."
 ports: []
 bricks: []

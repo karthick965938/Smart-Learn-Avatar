@@ -17,14 +17,6 @@
 
 ---
 
-## 🎥 Demo
-
-[![Smart Learn Demo](https://img.youtube.com/vi/sbAEzvDquOA/0.jpg)](https://www.youtube.com/watch?v=sbAEzvDquOA)
-
-*[Watch on YouTube](https://www.youtube.com/watch?v=sbAEzvDquOA)* — knowledge base setup, voice Q&A, and IoT interaction.
-
----
-
 ## 🏗️ Overview
 
 Smart Learn has four main parts that work together:
