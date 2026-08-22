@@ -1,0 +1,29 @@
+Question: What is Web Development?
+Answer: Web development is the process of designing, building, deploying, and maintaining websites and web applications. It can involve technologies such as HTML, CSS, JavaScript, web servers, databases, and backend programming languages.
+
+Question: What is HTML?
+Answer: HTML (HyperText Markup Language) is the standard markup language used to define the structure and content of web pages. HTML is used to organize elements such as headings, paragraphs, links, images, forms, tables, and other page content.
+
+Question: What is CSS?
+Answer: CSS (Cascading Style Sheets) is a stylesheet language used to control the presentation and visual appearance of web pages. CSS can define properties such as colors, fonts, spacing, layouts, animations, and responsive designs.
+
+Question: What is JavaScript?
+Answer:JavaScript is a programming language commonly used to add interactivity and dynamic behavior to websites and web applications. JavaScript can respond to user actions, modify web page content, communicate with servers, and implement application logic.
+
+Question: What is a web browser?
+Answer:A web browser is software that retrieves, interprets, and displays web content. Examples of web browsers include Google Chrome, Mozilla Firefox, Microsoft Edge, Safari, and Opera.
+
+Question: What is a website?
+Answer:A website is a collection of related web pages, files, and other resources that are accessible through the internet under a domain name. A website can contain text, images, videos, interactive features, and other types of content.
+
+Question: What is a URL?
+Answer:A URL (Uniform Resource Locator) is a standardized address used to identify and access a resource on the internet. A URL can identify resources such as web pages, images, videos, files, or API endpoints.
+
+Question: What is a web server?
+Answer:A web server is software or a computer system that receives requests from clients, such as web browsers, and delivers web content or other resources in response. Web servers can serve static files and can also work with application servers to provide dynamic content.
+
+Question: What is responsive web design?
+Answer:Responsive web design is an approach to designing websites so that their layout and content adapt to different screen sizes, resolutions, and devices. It helps websites provide a usable experience on desktops, laptops, tablets, and mobile phones.
+
+Question: What is a hyperlink?
+Answer:A hyperlink is a clickable reference that allows a user to navigate from one web page, document, section, or resource to another. Hyperlinks are commonly created in HTML using the anchor element.

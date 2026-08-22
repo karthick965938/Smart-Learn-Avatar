@@ -1,0 +1,29 @@
+Question: What are parts of speech?
+Answer: Parts of speech are categories of words classified according to their grammatical function and role in a sentence. They help describe how words are used to form meaningful sentences.
+
+Question: What is a noun?
+Answer: A noun is a word that names a person, place, thing, animal, or idea. Examples include teacher, city, book, dog, and happiness.
+
+Question: What is a pronoun?
+Answer: A pronoun is a word used in place of a noun or noun phrase to avoid repetition or refer to someone or something already mentioned. Examples include he, she, it, they, we, and you.
+
+Question: What is a verb?
+Answer: A verb is a word that expresses an action, occurrence, or state of being. Examples include run, write, think, become, and is.
+
+Question: What is an adjective?
+Answer: An adjective is a word that modifies or describes a noun or pronoun by providing additional information about it. Examples include beautiful, large, intelligent, and three.
+
+Question: What is an adverb?
+Answer: An adverb is a word that modifies a verb, an adjective, another adverb, or sometimes an entire clause. Adverbs can describe how, when, where, or to what degree something happens. Examples include quickly, very, yesterday, and carefully.
+
+Question: What is a preposition?
+Answer: A preposition is a word that expresses a relationship between a noun or pronoun and another word or element in a sentence. Prepositions can indicate relationships involving location, time, direction, or other connections. Examples include in, on, under, between, from, and toward.
+
+Question: What is a conjunction?
+Answer: A conjunction is a word that connects words, phrases, clauses, or sentences. Common conjunctions include and, but, or, because, although, and while.
+
+Question: What is an interjection?
+Answer: An interjection is a word or short expression used to express a sudden feeling, reaction, or emotion. Examples include wow, oh, hey, ouch, and congratulations.
+
+Question: How many main parts of speech are commonly taught in English?
+Answer: English grammar commonly teaches eight main parts of speech: noun, pronoun, verb, adjective, adverb, preposition, conjunction, and interjection. Different grammar systems may use additional categories or classify certain words differently, but these eight are widely taught as the traditional main categories.

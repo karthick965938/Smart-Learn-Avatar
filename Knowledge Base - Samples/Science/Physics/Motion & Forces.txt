@@ -1,0 +1,29 @@
+Question: What is motion?
+Answer: Motion is the change in the position of an object relative to a reference point over time. An object is considered to be in motion when its position changes with respect to that reference frame.
+
+Question: What is force?
+Answer: Force is an interaction that can change the motion of an object or cause it to deform. Force is a vector quantity, meaning it has both magnitude and direction.
+
+Question: What is speed?
+Answer: Speed is the distance traveled by an object per unit of time. It is a scalar quantity and can be calculated using the formula speed = distance ÷ time. The SI unit of speed is metres per second (m/s).
+
+Question: What is velocity?
+Answer: Velocity is the rate of change of an object's displacement with respect to time. It is a vector quantity and therefore has both magnitude and direction. An object's velocity can change if its speed changes, its direction changes, or both.
+
+Question: What is acceleration?
+Answer: Acceleration is the rate of change of velocity with respect to time. It is a vector quantity and can result from a change in an object's speed, direction, or both. The SI unit of acceleration is metres per second squared (m/s²).
+
+Question: What is the SI unit of force?
+Answer: The SI unit of force is the newton (N). One newton is the force required to give a mass of one kilogram an acceleration of one metre per second squared. Therefore, 1 N = 1 kg·m/s².
+
+Question: What is Newton's First Law of Motion?
+Answer: Newton's First Law of Motion states that an object remains at rest or continues moving with constant velocity in a straight line unless acted upon by a net external force. This law is also known as the law of inertia.
+
+Question: What is Newton's Second Law of Motion?
+Answer: Newton's Second Law of Motion states that the net force acting on an object is equal to the object's mass multiplied by its acceleration. The relationship is expressed as F = ma, where F is net force, m is mass, and a is acceleration.
+
+Question: What is Newton's Third Law of Motion?
+Answer: Newton's Third Law of Motion states that when one object exerts a force on another object, the second object simultaneously exerts a force of equal magnitude and opposite direction on the first object. These forces act on different objects.
+
+Question: What is friction?
+Answer: Friction is a force that opposes relative motion or the tendency of relative motion between surfaces that are in contact. Friction can act between solid surfaces and can also occur in fluids. The amount of friction depends on factors such as the materials involved and the forces pressing the surfaces together.

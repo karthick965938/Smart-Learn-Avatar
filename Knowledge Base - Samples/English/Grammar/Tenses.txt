@@ -1,0 +1,29 @@
+Question: What is tense in English grammar?
+Answer: Tense is a grammatical form of a verb that helps indicate the time of an action, event, or state. English commonly expresses time through present, past, and future forms and constructions.
+
+Question: How many main tenses are there in English?
+Answer: English is commonly taught as having three main time categories: present, past, and future. These can be expressed through different grammatical aspects and constructions, such as simple, continuous, perfect, and perfect continuous forms.
+
+Question: What is the present tense?
+Answer: The present tense is used to describe actions, events, states, habits, or situations that occur in the present or are generally true. The exact meaning depends on the particular present-tense construction being used.
+
+Question: What is the past tense?
+Answer: The past tense is used to describe actions, events, or situations that occurred before the present time. Different past-tense constructions can show whether an action was completed, ongoing, or related to another past event.
+
+Question: What is the future tense?
+Answer: The future is used to describe actions, events, or situations expected to occur after the present time. English commonly expresses future meaning using constructions such as "will," "be going to," and the present continuous.
+
+Question: What is the simple present tense?
+Answer: The simple present tense is commonly used to describe habits, routines, repeated actions, general truths, facts, and stable situations. Example: "She works at a school." It can also be used for scheduled future events in appropriate contexts.
+
+Question: What is the simple past tense?
+Answer: The simple past tense is commonly used to describe actions or events that were completed in the past. Example: "They visited Chennai last week."
+
+Question: What is the simple future tense?
+Answer: The simple future is commonly expressed using "will" followed by the base form of the verb. It can describe future actions, predictions, decisions made at the time of speaking, promises, and other future situations. Example: "I will call you tomorrow."
+
+Question: What is the present continuous tense?
+Answer: The present continuous tense is formed using the present form of "be" followed by the present participle (verb ending in "-ing"). It is commonly used for actions happening at the time of speaking or around the present time. Example: "She is studying now."
+
+Question: What is the present perfect tense?
+Answer: The present perfect tense is formed using "have" or "has" followed by the past participle of the verb. It is used for past actions or events that have a connection to the present, including experiences, recently completed actions, and situations that began in the past and continue into the present. Example: "They have finished their work."

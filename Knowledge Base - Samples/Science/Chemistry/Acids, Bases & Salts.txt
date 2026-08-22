@@ -1,0 +1,29 @@
+Question: What is an acid?
+Answer: An acid is a substance that can donate hydrogen ions (H+) or increase the concentration of hydrogen ions in an aqueous solution. Examples include hydrochloric acid (HCl), sulfuric acid (H2SO4), and acetic acid (CH3COOH).
+
+Question: What is a base?
+Answer: A base is a substance that can accept hydrogen ions (H+) or, in aqueous solution, increase the concentration of hydroxide ions (OH-). Examples include sodium hydroxide (NaOH) and calcium hydroxide (Ca(OH)2).
+
+Question: What is a salt?
+Answer: A salt is an ionic compound composed of positively charged ions and negatively charged ions. Salts can be formed through acid-base neutralization reactions, although they can also be produced through other types of chemical reactions. Sodium chloride (NaCl) is a common example of a salt.
+
+Question: What is the pH scale?
+Answer: The pH scale is a logarithmic scale used to describe the acidity or basicity of an aqueous solution. At around 25°C, a pH of 7 is considered neutral, values below 7 are acidic, and values above 7 are basic. The commonly taught scale ranges from 0 to 14, although pH values outside this range are possible for some concentrated solutions.
+
+Question: What is the pH of a neutral solution?
+Answer: At approximately 25°C, a neutral aqueous solution has a pH of 7. The neutral pH value can vary with temperature because the relationship between hydrogen ions and hydroxide ions changes with temperature.
+
+Question: What is an indicator?
+Answer: An indicator is a substance that changes color over a particular pH range, allowing the acidity or basicity of a solution to be estimated. Common indicators include litmus, methyl orange, and phenolphthalein.
+
+Question: What happens when an acid reacts with a base?
+Answer: When an acid reacts with a base, they can undergo a neutralization reaction. In a typical acid-base reaction, the acid and base react to form water and a salt. For example, hydrochloric acid reacts with sodium hydroxide to form sodium chloride and water.
+
+Question: Give one example of an acid.
+Answer: Hydrochloric acid (HCl) is an example of an acid. It is a strong acid that dissociates extensively in aqueous solution.
+
+Question: Give one example of a base.
+Answer: Sodium hydroxide (NaOH) is an example of a base. It is a strong base that dissociates extensively in aqueous solution.
+
+Question: What is neutralization?
+Answer: Neutralization is an acid-base chemical reaction in which an acid reacts with a base. In a typical reaction involving an acid and a metal hydroxide, the products are water and a salt. For example: HCl + NaOH → NaCl + H2O.

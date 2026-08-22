@@ -1,0 +1,29 @@
+Question: What is a computer program?
+Answer: A computer program is a set of instructions written in a programming language that tells a computer how to perform a specific task or solve a particular problem.
+
+Question: What is a variable?
+Answer: A variable is a named reference or storage location used by a program to hold a value that can be accessed and, depending on the programming language and declaration, changed during program execution.
+
+Question: What is an algorithm?
+Answer: An algorithm is a finite sequence of well-defined steps used to solve a problem, perform a computation, or complete a specific task.
+
+Question: What is a programming language?
+Answer: A programming language is a formal language used to write instructions that can be processed and executed by a computer. Examples include Python, Java, JavaScript, C, C++, and C#.
+
+Question: What is a data type?
+Answer: A data type defines the kind of value that a variable or expression can represent and the operations that can typically be performed on that value. Common data types include integers, floating-point numbers, strings, characters, and Boolean values.
+
+Question: What is a loop?
+Answer: A loop is a programming construct that repeatedly executes a block of code while a specified condition is satisfied or for a defined number of iterations. Common types of loops include for loops and while loops.
+
+Question: What is an if statement?
+Answer: An if statement is a conditional programming construct that executes a block of code when a specified condition evaluates to true. Many programming languages also support else or else-if branches for handling alternative conditions.
+
+Question: What is a compiler?
+Answer: A compiler is a software tool that translates source code written in a programming language into another form, such as machine code, bytecode, or an intermediate representation, so that it can be executed or further processed.
+
+Question: What is debugging?
+Answer: Debugging is the process of identifying, analyzing, and fixing errors or unexpected behavior in a computer program. Developers use debugging techniques and tools to determine the cause of a problem and verify that the program works correctly.
+
+Question: What is a function?
+Answer: A function is a reusable block of code designed to perform a specific task. Functions can accept input values called parameters or arguments, perform operations, and optionally return a result.

@@ -1,0 +1,29 @@
+Question: What is light?
+Answer: Light is a form of electromagnetic radiation that can be detected by the human eye. Visible light enables us to see objects when light reaches our eyes, either directly from a light source or after reflecting from an object.
+
+Question: How does light travel?
+Answer: Light generally travels in straight lines through a uniform, transparent medium. This behavior is known as rectilinear propagation of light. Light can change direction when it is reflected, refracted, or scattered.
+
+Question: What is reflection of light?
+Answer: Reflection is the process in which light changes direction and returns into the original medium after striking a surface. The law of reflection states that the angle of incidence is equal to the angle of reflection, when measured from the normal to the surface.
+
+Question: What is refraction of light?
+Answer: Refraction is the change in direction and speed of light when it passes from one transparent medium into another with a different refractive index. The amount of bending depends on the properties of the two media and the angle at which the light enters.
+
+Question: What is a transparent material?
+Answer: A transparent material allows most visible light to pass through it with relatively little scattering, so objects can generally be seen clearly through the material. Examples include clean glass and clear water.
+
+Question: What is sound?
+Answer: Sound is a mechanical wave produced by vibrating objects and transmitted through a material medium such as a solid, liquid, or gas. Sound transfers energy through the medium without requiring the bulk material to move from the source to the receiver.
+
+Question: Does sound travel through a vacuum?
+Answer: No. Sound cannot travel through a vacuum because it is a mechanical wave that requires a material medium containing particles to transmit the vibration.
+
+Question: What is frequency of sound?
+Answer: The frequency of a sound wave is the number of complete vibrations or cycles that occur per second. Frequency is measured in hertz (Hz), where 1 hertz equals one cycle per second.
+
+Question: What determines the pitch of a sound?
+Answer: The frequency of a sound wave primarily determines its pitch, which is how high or low the sound is perceived. A higher frequency generally produces a higher-pitched sound, while a lower frequency produces a lower-pitched sound.
+
+Question: What determines the loudness of a sound?
+Answer: The amplitude of a sound wave is related to the intensity of the sound and strongly influences its perceived loudness. Generally, a greater amplitude corresponds to a louder sound, although perceived loudness also depends on factors such as frequency and the sensitivity of the human ear.
