@@ -37,11 +37,13 @@ Smart Learn Web (browser)  ◄── poll events ──────────�
 
 ## OLED flow
 
-1. **Ready** — `Tap your card`
-2. **Scanning** — `Scanning RFID...` + UID
-3. **Assigned** — `Knowledge Base Selected:` + KB name from API
-4. **Unassigned** — `Card not assigned` / assign in Smart Learn Web
-5. **Error** — `Connection failed` / `Check server`
+1. **Idle** — `Tap your card` / `to select a` / `knowledge base`
+2. **Scanning** — `Reading card...` / `Please wait`
+3. **Assigned** — `Knowledge base:` + name (shown for **10 seconds**), then returns to idle
+4. **Unassigned** — `New card found` / assign in Smart Learn Web (5 seconds, then idle)
+5. **Error** — `Server unreachable` / check API and network (5 seconds, then idle)
+
+Header on all screens: **Smart Learn**
 
 ## Config
 

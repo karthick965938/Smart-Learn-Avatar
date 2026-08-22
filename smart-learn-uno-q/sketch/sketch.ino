@@ -27,6 +27,9 @@ Adafruit_SH1106G display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 String lastUID = "";
 unsigned long lastCallTime = 0;
 const unsigned long CALL_COOLDOWN_MS = 3000;
+const unsigned long KB_RESULT_DISPLAY_MS = 10000;
+const unsigned long STATUS_DISPLAY_MS = 5000;
+const unsigned long DUPLICATE_DISPLAY_MS = 2000;
 
 // ---------------------------------------------------------------------------
 // OLED helpers
@@ -63,50 +66,45 @@ void oledShow(const char *line1, const char *line2 = "", const char *line3 = "")
   display.setTextColor(SH110X_WHITE);
 
   display.setCursor(0, 0);
-  display.println("Smart Learn 2.0");
+  display.println("Smart Learn");
   display.drawLine(0, 10, 127, 10, SH110X_WHITE);
 
-  display.setCursor(0, 14);
-  if (line1 && line1[0]) {
-    display.println(line1);
-  }
+  int y = 16;
+  const char *lines[] = {line1, line2, line3};
 
-  display.setCursor(0, 26);
-  if (line2 && line2[0]) {
-    display.println(line2);
-  }
-
-  display.setCursor(0, 38);
-  if (line3 && line3[0]) {
-    display.println(line3);
+  for (int i = 0; i < 3; i++) {
+    if (lines[i] && lines[i][0]) {
+      display.setCursor(0, y);
+      display.println(lines[i]);
+      y += 12;
+    }
   }
 
   display.display();
 }
 
 void oledShowReady() {
-  oledShow("Ready", "Tap your card");
+  oledShow("Tap your card", "to select a", "knowledge base");
 }
 
 void oledShowStarting() {
-  oledShow("Starting...", "RFID reader");
+  oledShow("Starting up...", "Connecting RFID", "reader");
 }
 
-void oledShowScanning(const String &displayUid) {
-  String uidLine = "UID: " + displayUid;
-  oledShow("Scanning RFID...", uidLine.c_str());
+void oledShowScanning() {
+  oledShow("Reading card...", "Please wait");
 }
 
 void oledShowAlreadyScanned() {
-  oledShow("Already scanned", "Remove card");
+  oledShow("Card detected", "Remove card to", "scan again");
 }
 
 void oledShowConnectionFailed() {
-  oledShow("Connection failed", "Check server");
+  oledShow("Server unreachable", "Check API and", "network connection");
 }
 
 void oledShowUnassigned() {
-  oledShow("Card not assigned", "Assign in web app");
+  oledShow("New card found", "Assign this card", "in Smart Learn Web");
 }
 
 void oledShowKbSelected(const String &kbName) {
@@ -119,18 +117,16 @@ void oledShowKbSelected(const String &kbName) {
   display.setTextColor(SH110X_WHITE);
 
   display.setCursor(0, 0);
-  display.println("Smart Learn 2.0");
+  display.println("Smart Learn");
   display.drawLine(0, 10, 127, 10, SH110X_WHITE);
 
-  display.setCursor(0, 14);
-  display.println("Knowledge Base");
-  display.setCursor(0, 26);
-  display.println("Selected:");
-  display.setCursor(0, 38);
+  display.setCursor(0, 16);
+  display.println("Knowledge base:");
+  display.setCursor(0, 30);
   display.println(nameLine1.c_str());
 
   if (nameLine2.length() > 0) {
-    display.setCursor(0, 50);
+    display.setCursor(0, 44);
     display.println(nameLine2.c_str());
   }
 
@@ -180,25 +176,26 @@ void rememberScan(const String &uid) {
   lastCallTime = millis();
 }
 
-void handleScanResult(const std::map<String, String> &result) {
+unsigned long handleScanResult(const std::map<String, String> &result) {
   bool ok = result.count("ok") && result.at("ok") == "1";
   bool assigned = result.count("assigned") && result.at("assigned") == "1";
   String kbName = result.count("kb_name") ? result.at("kb_name") : "";
 
   if (!ok) {
     oledShowConnectionFailed();
-    return;
+    return STATUS_DISPLAY_MS;
   }
 
   if (assigned && kbName.length() > 0) {
     oledShowKbSelected(kbName);
-    Monitor.print("Knowledge Base selected: ");
+    Monitor.print("Knowledge base selected: ");
     Monitor.println(kbName);
-    return;
+    return KB_RESULT_DISPLAY_MS;
   }
 
   oledShowUnassigned();
   Monitor.println("Card scanned but not assigned.");
+  return STATUS_DISPLAY_MS;
 }
 
 // ---------------------------------------------------------------------------
@@ -221,7 +218,12 @@ void setup() {
   rfid.PCD_Init();
   delay(100);
 
-  Monitor.println("Smart Learn 2.0 RFID ready.");
+  Monitor.println("Smart Learn RFID ready.");
+  oledShowReady();
+}
+
+void showMessageThenReady(unsigned long displayMs) {
+  delay(displayMs);
   oledShowReady();
 }
 
@@ -249,28 +251,25 @@ void loop() {
     Monitor.println("Same card - scan skipped.");
     oledShowAlreadyScanned();
     haltCard();
-    delay(1500);
-    oledShowReady();
+    showMessageThenReady(DUPLICATE_DISPLAY_MS);
     return;
   }
 
-  oledShowScanning(displayUid);
+  oledShowScanning();
   Monitor.println("Calling API...");
 
   std::map<String, String> result;
   bool bridgeOk = Bridge.call("rfid_detected", uid).result(result);
 
+  unsigned long displayMs = STATUS_DISPLAY_MS;
   if (!bridgeOk) {
     Monitor.println("Bridge call failed.");
     oledShowConnectionFailed();
   } else {
-    handleScanResult(result);
+    displayMs = handleScanResult(result);
   }
 
   rememberScan(uid);
   haltCard();
-
-  delay(2500);
-  oledShowReady();
-  delay(500);
+  showMessageThenReady(displayMs);
 }
