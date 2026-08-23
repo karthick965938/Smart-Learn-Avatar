@@ -3,11 +3,12 @@
 #include <MFRC522.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
+#include "ssd1306_i2c.h"
 #include <map>
 
 // ---------------------------------------------------------------------------
 // Hardware — 0.96" OLED (SSD1306, 128×64, I2C)
+// Uses a Zephyr-safe Wire driver (Adafruit SSD1306 does not build on UNO Q).
 // ---------------------------------------------------------------------------
 
 #define SS_PIN 10
@@ -19,7 +20,7 @@
 #define OLED_LINE_CHARS 21
 
 MFRC522 rfid(SS_PIN, RST_PIN);
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+Ssd1306I2c display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 // ---------------------------------------------------------------------------
 // Scan state

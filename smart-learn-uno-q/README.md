@@ -83,7 +83,7 @@ Some RC522 boards label chip select as **SDA** — that is the SPI CS line, not 
 | **SDA** | I2C data | **D20** (SDA) | `Wire` default |
 | **SCL** | I2C clock | **D21** (SCL) | `Wire` default |
 
-I2C address: **`0x3C`** (`OLED_I2C_ADDRESS` in the sketch). Driver: **Adafruit SSD1306**.
+I2C address: **`0x3C`** (`OLED_I2C_ADDRESS` in the sketch). Driver: Zephyr-safe Wire SSD1306 (`ssd1306_i2c.h`) — Adafruit SSD1306 does not compile on UNO Q.
 
 Some OLED modules label pins **D0 = SCL**, **D1 = SDA** — match those to **D21** and **D20**.
 
