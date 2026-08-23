@@ -11,6 +11,6 @@ profiles:
       - MFRC522_NTAG424DNA (1.0.1)
       - dependency: Adafruit BusIO (1.17.4)
       - Adafruit GFX Library (1.12.6)
-      - Adafruit SH110X (2.1.15)
+      - Adafruit SSD1306 (2.5.13)
 
 default_profile: default

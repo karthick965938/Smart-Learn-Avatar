@@ -77,10 +77,26 @@ Set ESP32 `KB_url` in NVS to the knowledge base you want for voice (match the KB
 
 Project: [`../smart-learn-uno-q/`](../smart-learn-uno-q/)
 
-| Connected module | Purpose | UNO Q pins |
-|------------------|---------|------------|
-| **RC522** | 13.56 MHz RFID | SS **10**, RST **9** (+ SPI) |
-| **SH1106 OLED** | Smart Learn 2.0 header, scan status, KB name | I2C SDA / SCL |
+**RC522 (SPI)** — use **3.3 V** power:
+
+| RC522 | UNO Q |
+|-------|-------|
+| VCC | `3.3V` |
+| GND | `GND` |
+| RST | **D9** |
+| SDA / CS | **D10** |
+| MOSI | **D11** |
+| MISO | **D12** |
+| SCK | **D13** |
+
+**0.96" OLED SSD1306 (I2C)** — address `0x3C`:
+
+| OLED | UNO Q |
+|------|-------|
+| VCC | `3.3V` |
+| GND | `GND` |
+| SDA | **D20** |
+| SCL | **D21** |
 
 Works with **[Smart Learn Web](../smart-learn-web/README.md)** for card registration and KB assignment.
 
@@ -88,7 +104,7 @@ Works with **[Smart Learn Web](../smart-learn-web/README.md)** for card registra
 Tap card → UNO Q → API → Web (IoT Setup) → assign KB → OLED shows selected KB
 ```
 
-Details: [`smart-learn-uno-q/README.md`](../smart-learn-uno-q/README.md)
+Full wiring: [`smart-learn-uno-q/README.md`](../smart-learn-uno-q/README.md)
 
 ---
 

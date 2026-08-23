@@ -122,7 +122,7 @@ IoT Setup manages **RFID card registry and knowledge base mapping** for the **Ar
 4. For unassigned cards, click **Assign KB**, pick a knowledge base, and save.
 5. Assigned cards show the linked KB name; use **Remove** to delete a card entry.
 
-The panel shows **RC522 wiring reference** for the UNO Q.
+The panel shows **RC522 (SPI)** and **0.96" SSD1306 OLED (I2C)** wiring for the UNO Q.
 
 **Hardware highlights:**
 

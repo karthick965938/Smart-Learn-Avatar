@@ -8,12 +8,21 @@ import {
 } from '@heroicons/react/24/outline';
 import { listRfidCards, assignRfidCard, deleteRfidCard } from '../api';
 
-const RC522_PINS = [
-    { signal: 'CS', gpio: 10 },
-    { signal: 'MOSI', gpio: 11 },
-    { signal: 'SCK', gpio: 12 },
-    { signal: 'MISO', gpio: 13 },
-    { signal: 'RST', gpio: 14 },
+const UNO_Q_RC522_PINS = [
+    { signal: 'VCC', pin: '3.3V' },
+    { signal: 'GND', pin: 'GND' },
+    { signal: 'RST', pin: 'D9' },
+    { signal: 'CS', pin: 'D10' },
+    { signal: 'MOSI', pin: 'D11' },
+    { signal: 'MISO', pin: 'D12' },
+    { signal: 'SCK', pin: 'D13' },
+];
+
+const UNO_Q_OLED_PINS = [
+    { signal: 'VCC', pin: '3.3V' },
+    { signal: 'GND', pin: 'GND' },
+    { signal: 'SDA', pin: 'D20' },
+    { signal: 'SCL', pin: 'D21' },
 ];
 
 const IoTSetup = ({ isOpen, onClose, showMessage, kbs = [], onCardsChange }) => {
@@ -105,22 +114,43 @@ const IoTSetup = ({ isOpen, onClose, showMessage, kbs = [], onCardsChange }) => 
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                    <div className="p-4 rounded-2xl border border-gray-800 bg-black/40">
+                    <div className="p-4 rounded-2xl border border-gray-800 bg-black/40 space-y-4">
                         <p className="text-sm text-gray-400 leading-relaxed">
-                            Scan an RFID card on your IoT device to register it here. A popup will appear
+                            Scan an RFID card on your Arduino UNO Q to register it here. A popup will appear
                             automatically so you can assign a Knowledge Base. Cards with an assigned KB will
-                            open voice chat when scanned again.
+                            open chat when scanned again.
                         </p>
-                        <div className="grid grid-cols-5 gap-2 mt-4">
-                            {RC522_PINS.map((pin) => (
-                                <div
-                                    key={pin.signal}
-                                    className="flex items-center justify-between px-2 py-1.5 rounded-lg bg-gray-900 border border-gray-800"
-                                >
-                                    <span className="text-[10px] font-bold text-gray-500">{pin.signal}</span>
-                                    <span className="text-[10px] font-mono text-orange-500">G{pin.gpio}</span>
-                                </div>
-                            ))}
+                        <div>
+                            <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">
+                                RC522 · SPI · UNO Q
+                            </p>
+                            <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
+                                {UNO_Q_RC522_PINS.map((pin) => (
+                                    <div
+                                        key={pin.signal}
+                                        className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg bg-gray-900 border border-gray-800"
+                                    >
+                                        <span className="text-[10px] font-bold text-gray-500">{pin.signal}</span>
+                                        <span className="text-[10px] font-mono text-orange-500">{pin.pin}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">
+                                0.96" OLED · SSD1306 · UNO Q
+                            </p>
+                            <div className="grid grid-cols-4 gap-2">
+                                {UNO_Q_OLED_PINS.map((pin) => (
+                                    <div
+                                        key={pin.signal}
+                                        className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg bg-gray-900 border border-gray-800"
+                                    >
+                                        <span className="text-[10px] font-bold text-gray-500">{pin.signal}</span>
+                                        <span className="text-[10px] font-mono text-sky-400">{pin.pin}</span>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
 

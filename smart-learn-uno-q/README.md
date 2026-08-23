@@ -1,6 +1,6 @@
 # Smart Learn 2.0 — Arduino UNO Q (Main Board)
 
-**Arduino UNO Q** is the **main board** for Smart Learn. It connects **RC522** (RFID) and **SH1106 OLED**, posts card scans to the API, and works with **[Smart Learn Web](../smart-learn-web/README.md)** for knowledge base assignment.
+**Arduino UNO Q** is the **main board** for Smart Learn. It connects **RC522** (RFID) and a **0.96" SSD1306 OLED**, posts card scans to the API, and works with **[Smart Learn Web](../smart-learn-web/README.md)** for knowledge base assignment.
 
 Works together with **ESP32-S3 Mini** for **Hi Json** voice Q&A (built-in mic, amplifier, and speaker).
 
@@ -57,14 +57,49 @@ Use the same host as `VITE_API_BASE_URL` (web) and `API_BASE_URL` (API).
 
 ## Wiring
 
-| Module   | UNO Q pin |
-|----------|-----------|
-| RC522 SS | 10        |
-| RC522 RST| 9         |
-| OLED SDA | I2C SDA   |
-| OLED SCL | I2C SCL   |
+Power both modules from **3.3 V** (RC522 is 3.3 V only). Share a common **GND** with the UNO Q.
 
-OLED I2C address: `0x3C`
+### RC522 (RFID) — SPI
+
+| RC522 pin | Connect to | UNO Q pin | Notes |
+|-----------|------------|-----------|--------|
+| **VCC** | 3.3 V | `3.3V` | Do not use 5 V |
+| **GND** | Ground | `GND` | Common ground |
+| **RST** | Reset | **D9** | Soft reset (`RST_PIN`) |
+| **SDA / NSS / CS** | Chip select | **D10** | SPI SS (`SS_PIN`) |
+| **MOSI** | SPI data out | **D11** | SPI MOSI |
+| **MISO** | SPI data in | **D12** | SPI MISO |
+| **SCK** | SPI clock | **D13** | SPI SCK |
+| **IRQ** | — | *not used* | Leave unconnected |
+
+Some RC522 boards label chip select as **SDA** — that is the SPI CS line, not I2C.
+
+### 0.96" OLED (SSD1306, 128×64) — I2C
+
+| OLED pin | Connect to | UNO Q pin | Notes |
+|----------|------------|-----------|--------|
+| **VCC** | 3.3 V | `3.3V` | Or `5V` if your module supports it |
+| **GND** | Ground | `GND` | Common ground |
+| **SDA** | I2C data | **D20** (SDA) | `Wire` default |
+| **SCL** | I2C clock | **D21** (SCL) | `Wire` default |
+
+I2C address: **`0x3C`** (`OLED_I2C_ADDRESS` in the sketch). Driver: **Adafruit SSD1306**.
+
+Some OLED modules label pins **D0 = SCL**, **D1 = SDA** — match those to **D21** and **D20**.
+
+### Quick pin summary
+
+```text
+RC522          UNO Q              0.96" OLED      UNO Q
+─────          ─────              ──────────      ─────
+VCC   ──────►  3.3V               VCC   ──────►  3.3V
+GND   ──────►  GND                GND   ──────►  GND
+RST   ──────►  D9                 SDA   ──────►  D20
+SDA/CS──────►  D10                SCL   ──────►  D21
+MOSI  ──────►  D11
+MISO  ──────►  D12
+SCK   ──────►  D13
+```
 
 ## Related docs
 

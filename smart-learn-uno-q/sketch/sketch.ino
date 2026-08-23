@@ -3,11 +3,11 @@
 #include <MFRC522.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
-#include <Adafruit_SH110X.h>
+#include <Adafruit_SSD1306.h>
 #include <map>
 
 // ---------------------------------------------------------------------------
-// Hardware
+// Hardware — 0.96" OLED (SSD1306, 128×64, I2C)
 // ---------------------------------------------------------------------------
 
 #define SS_PIN 10
@@ -15,10 +15,11 @@
 #define OLED_I2C_ADDRESS 0x3C
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
+#define OLED_RESET -1
 #define OLED_LINE_CHARS 21
 
 MFRC522 rfid(SS_PIN, RST_PIN);
-Adafruit_SH1106G display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 // ---------------------------------------------------------------------------
 // Scan state
@@ -63,11 +64,11 @@ void wrapText(const String &text, String &line1, String &line2) {
 void oledShow(const char *line1, const char *line2 = "", const char *line3 = "") {
   display.clearDisplay();
   display.setTextSize(1);
-  display.setTextColor(SH110X_WHITE);
+  display.setTextColor(SSD1306_WHITE);
 
   display.setCursor(0, 0);
   display.println("Smart Learn");
-  display.drawLine(0, 10, 127, 10, SH110X_WHITE);
+  display.drawLine(0, 10, 127, 10, SSD1306_WHITE);
 
   int y = 16;
   const char *lines[] = {line1, line2, line3};
@@ -114,11 +115,11 @@ void oledShowKbSelected(const String &kbName) {
 
   display.clearDisplay();
   display.setTextSize(1);
-  display.setTextColor(SH110X_WHITE);
+  display.setTextColor(SSD1306_WHITE);
 
   display.setCursor(0, 0);
   display.println("Smart Learn");
-  display.drawLine(0, 10, 127, 10, SH110X_WHITE);
+  display.drawLine(0, 10, 127, 10, SSD1306_WHITE);
 
   display.setCursor(0, 16);
   display.println("Knowledge base:");
@@ -207,9 +208,11 @@ void setup() {
   Bridge.begin();
 
   Wire.begin();
-  if (!display.begin(OLED_I2C_ADDRESS, true)) {
-    Monitor.println("OLED initialization failed!");
+  if (!display.begin(SSD1306_SWITCHCAPVCC, OLED_I2C_ADDRESS)) {
+    Monitor.println("0.96 OLED (SSD1306) initialization failed!");
   } else {
+    display.clearDisplay();
+    display.display();
     oledShowStarting();
     delay(1500);
   }
