@@ -80,12 +80,12 @@ Some RC522 boards label chip select as **SDA** — that is the SPI CS line, not 
 |----------|------------|-----------|--------|
 | **VCC** | 3.3 V | `3.3V` | Or `5V` if your module supports it |
 | **GND** | Ground | `GND` | Common ground |
-| **SDA** | I2C data | **D20** (SDA) | `Wire` default |
-| **SCL** | I2C clock | **D21** (SCL) | `Wire` default |
+| **SDA** | I2C data | **SDA** | Dedicated I2C pin (`Wire`) |
+| **SCL** | I2C clock | **SCL** | Dedicated I2C pin (`Wire`) |
 
 I2C address: **`0x3C`** (`OLED_I2C_ADDRESS` in the sketch). Driver: Zephyr-safe Wire SSD1306 (`ssd1306_i2c.h`) — Adafruit SSD1306 does not compile on UNO Q.
 
-Some OLED modules label pins **D0 = SCL**, **D1 = SDA** — match those to **D21** and **D20**.
+Some OLED modules label pins **D0 = SCL**, **D1 = SDA** — connect those to the board **SCL** and **SDA** pins.
 
 ### Quick pin summary
 
@@ -94,8 +94,8 @@ RC522          UNO Q              0.96" OLED      UNO Q
 ─────          ─────              ──────────      ─────
 VCC   ──────►  3.3V               VCC   ──────►  3.3V
 GND   ──────►  GND                GND   ──────►  GND
-RST   ──────►  D9                 SDA   ──────►  D20
-SDA/CS──────►  D10                SCL   ──────►  D21
+RST   ──────►  D9                 SDA   ──────►  SDA
+SDA/CS──────►  D10                SCL   ──────►  SCL
 MOSI  ──────►  D11
 MISO  ──────►  D12
 SCK   ──────►  D13

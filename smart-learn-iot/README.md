@@ -95,8 +95,8 @@ Project: [`../smart-learn-uno-q/`](../smart-learn-uno-q/)
 |------|-------|
 | VCC | `3.3V` |
 | GND | `GND` |
-| SDA | **D20** |
-| SCL | **D21** |
+| SDA | **SDA** |
+| SCL | **SCL** |
 
 Works with **[Smart Learn Web](../smart-learn-web/README.md)** for card registration and KB assignment.
 

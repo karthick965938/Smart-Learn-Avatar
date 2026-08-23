@@ -21,8 +21,8 @@ const UNO_Q_RC522_PINS = [
 const UNO_Q_OLED_PINS = [
     { signal: 'VCC', pin: '3.3V' },
     { signal: 'GND', pin: 'GND' },
-    { signal: 'SDA', pin: 'D20' },
-    { signal: 'SCL', pin: 'D21' },
+    { signal: 'SDA', pin: 'SDA' },
+    { signal: 'SCL', pin: 'SCL' },
 ];
 
 const IoTSetup = ({ isOpen, onClose, showMessage, kbs = [], onCardsChange }) => {
