@@ -1,5 +1,9 @@
 # 🎓 Smart Learn
 
+<p align="center">
+  <img src="./SmartLearn.png" alt="SmartLearn — RFID Powered Physical AI Learning Assistant" width="100%">
+</p>
+
 **Smart Learn** is a full-stack AI learning platform. **Arduino UNO Q** is the main board with **RC522** RFID and **OLED** display, paired with **Smart Learn Web** for knowledge base selection. **ESP32-S3 Mini** powers hands-free voice with wake word **"Hi Json"**, built-in microphone, amplifier, and speaker output.
 
 ---
@@ -14,6 +18,14 @@
 | **🎙️ Voice assistant** | ESP32-S3 Mini — **"Hi Json"** wake word, STT, KB query, TTS on built-in audio |
 | **🌐 Web dashboard** | Manage KBs, documents, AI setup, RFID assignments, and chat preview |
 | **🔄 Live RFID updates** | Card → KB mappings in the API; change anytime in **IoT Setup** |
+
+---
+
+## 🎥 Demo
+
+[![Smart Learn Demo](https://img.youtube.com/vi/VB4N3pkbW_0/0.jpg)](https://youtu.be/VB4N3pkbW_0)
+
+*[Watch on YouTube](https://youtu.be/VB4N3pkbW_0)* — RFID knowledge switching, OLED feedback, and Smart Learn in action.
 
 ---
 
