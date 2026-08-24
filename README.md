@@ -15,7 +15,7 @@
 | **📚 Multi-KB RAG** | Isolated knowledge bases with ChromaDB + GPT-4o-mini, grounded answers from your own content |
 | **📄 Multi-format KBs** | Upload **PDF**, **DOCX**, **CSV**, **TXT**, URLs, and images (**PNG**, **JPG**, **WEBP**, **GIF**) — extracted, chunked, and embedded for RAG |
 | **📡 RFID hub** | Arduino UNO Q + RC522 + OLED — tap a card, assign KB in **Smart Learn Web** |
-| **🎙️ Voice assistant** | ESP32-S3 Mini — **"Hi Json"** wake word, STT, KB query, TTS on built-in audio |
+| **🎙️ Voice assistant** | ESP32-S3 Mini — **"Hi Json"** wake word, STT, KB query, TTS on **built-in** mic / amp / speaker |
 | **🌐 Web dashboard** | Manage KBs, documents, AI setup, RFID assignments, and chat preview |
 | **🔄 Live RFID updates** | Card → KB mappings in the API; change anytime in **IoT Setup** |
 
@@ -43,13 +43,13 @@ Smart Learn has four main parts that work together:
                     ┌─────────────────────────────────┐
                     │      Smart Learn API            │
                     └───────────────┬─────────────────┘
-                          ▲                    ▲
-              RFID scan   │                    │  voice KB query
-                          │                    │
-          ┌───────────────┴───┐      ┌─────────┴──────────────┐
-          │  Arduino UNO Q    │      │   ESP32-S3 Mini        │
-          │  MAIN · RC522+OLED│      │   VOICE · mic+speaker  │
-          │  (smart-learn-uno-q)     │   (smart-learn-iot)    │
+                          ▲                      ▲
+              RFID scan   │                      │  voice KB query
+                          │                      │
+          ┌───────────────┴─────┐      ┌─────────┴──────────────┐
+          │  Arduino UNO Q      │      │   ESP32-S3 Mini        │
+          │  MAIN · RC522+OLED  │      │   VOICE · mic+speaker  │
+          │  (smart-learn-uno-q)│      │   (smart-learn-iot)    │
           └─────────────────────┘      └────────────────────────┘
 ```
 
@@ -93,7 +93,7 @@ Browser control center for knowledge bases, documents, AI setup, and RFID manage
 
 ### 🤖 [Smart Learn IoT](./smart-learn-iot/README.md) — voice module
 
-**ESP32-S3 Mini** — built-in microphone, audio amplifier, and external speaker.
+**ESP32-S3 Mini** — built-in microphone, audio amplifier, and speaker (no external audio wiring).
 
 - **Hi Json** wake word → STT → KB query (`KB_url` in NVS) → TTS
 - WiFi-connected voice answers grounded in your knowledge bases
@@ -107,7 +107,7 @@ Browser control center for knowledge bases, documents, AI setup, and RFID manage
 3. **Create a knowledge base** — upload documents, URLs, or images.
 4. **Configure AI Setup** — assistant name, instructions, conversation type.
 5. **Deploy Arduino UNO Q** — wire **RC522** + **OLED**; flash [`smart-learn-uno-q`](./smart-learn-uno-q/).
-6. **Flash ESP32-S3 Mini** — voice firmware + NVS; connect external speaker for **Hi Json** voice Q&A.
+6. **Flash ESP32-S3 Mini** — voice firmware + NVS (built-in mic / amp / speaker; USB power only).
 7. **Tap a card on the UNO Q** — assign KB in **Smart Learn Web**; OLED shows selected KB; chat opens for assigned cards.
 8. **Say "Hi Json" on the ESP32** — voice queries use `KB_url` from NVS (align with the KB you assigned on the UNO Q).
 
@@ -138,7 +138,7 @@ idf.py set-target esp32s3
 idf.py build flash monitor
 ```
 
-See each module’s README for full setup, NVS provisioning, and wiring.
+See each module’s README for full setup and NVS provisioning. RFID/OLED wiring is in [`smart-learn-uno-q`](./smart-learn-uno-q/README.md); ESP32-S3 Mini needs no audio wiring ([WIRING.md](./smart-learn-iot/smart-learn-board/WIRING.md)).
 
 ---
 
@@ -148,7 +148,7 @@ See each module’s README for full setup, NVS provisioning, and wiring.
 |--------|--------|-------|
 | API | [smart-learn-api/README.md](./smart-learn-api/README.md) | [API.md](./smart-learn-api/API.md) |
 | Web | [smart-learn-web/README.md](./smart-learn-web/README.md) | — |
-| IoT | [smart-learn-iot/README.md](./smart-learn-iot/README.md) | [SETUP.md](./smart-learn-iot/smart-learn-board/SETUP.md), [WIRING.md](./smart-learn-iot/smart-learn-board/WIRING.md) |
+| IoT | [smart-learn-iot/README.md](./smart-learn-iot/README.md) | [SETUP.md](./smart-learn-iot/smart-learn-board/SETUP.md), [WIRING.md](./smart-learn-iot/smart-learn-board/WIRING.md) (Mini: no wiring) |
 | UNO Q | [smart-learn-uno-q/README.md](./smart-learn-uno-q/README.md) | — |
 
 ---

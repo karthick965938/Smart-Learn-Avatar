@@ -1,121 +1,78 @@
-# Smart Learn Board — Wiring Guide
+# Smart Learn Board — Hardware Notes
 
-Default GPIO assignments from `components/bsp-custom/Kconfig.projbuild`.  
-All modules use **3.3 V** logic. Connect **GND** common to ESP32-S3 GND.
+## Supported board for this project: ESP32-S3 Mini
 
----
+**Smart Learn voice firmware** targets the **ESP32-S3 Mini**.
 
-## ESP32-S3 ↔ INMP441 (I2S Microphone)
+| On the ESP32-S3 Mini | Status |
+|----------------------|--------|
+| Microphone | **Built-in** — no external mic wiring |
+| Audio amplifier | **Built-in** — no external amp wiring |
+| Speaker | **Built-in** — no external speaker wiring |
+| WiFi | On-chip |
 
-| INMP441 pin | Connect to | ESP32-S3 GPIO | Notes |
-|-------------|------------|---------------|-------|
-| VDD | 3.3 V | 3.3 V | |
-| GND | GND | GND | |
-| SCK | BCLK | **GPIO 4** | Bit clock |
-| WS | L/R select + WS | **GPIO 5** | Word select / left-right |
-| SD | DOUT | **GPIO 6** | Serial data out → ESP32 DIN |
-| L/R | GND | GND | **Left channel** (mono) |
+**You do not need to wire INMP441, MAX98357A, OLED, or RC522 to the ESP32-S3 Mini.**
 
----
+RFID + OLED belong on the **[Arduino UNO Q](../../smart-learn-uno-q/README.md)** main board. See that README for UNO Q wiring (RC522 SPI + OLED I2C).
 
-## ESP32-S3 ↔ MAX98357A (I2S Amplifier / Speaker)
+### What to connect on ESP32-S3 Mini
 
-| MAX98357A pin | Connect to | ESP32-S3 GPIO | Notes |
-|---------------|------------|---------------|-------|
-| VIN | 3.3 V or 5 V | 3.3 V / 5 V | 5 V = louder |
-| GND | GND | GND | |
-| BCLK | BCLK | **GPIO 15** | Bit clock |
-| LRC | WS | **GPIO 16** | Left/right clock |
-| DIN | DOUT | **GPIO 7** | Data in ← ESP32 DOUT |
-| GAIN | — | GND or float | GND = 9 dB default gain |
-| SD | 3.3 V | 3.3 V | **Must be high** — chip enable |
+1. USB power / flash cable  
+2. Flash firmware + NVS ([SETUP.md](./SETUP.md))  
+3. Say **"Hi Json"** to start voice Q&A  
 
-Speaker: connect **+** and **−** to MAX98357A **+** and **−** outputs.
+That’s it for the voice module.
 
 ---
 
-## ESP32-S3 DevKit wiring (your board)
+## Board roles (Smart Learn)
 
-If you use an **ESP32-S3-WROOM-1** dev board on a breadboard with a 4-pin OLED:
-
-| OLED pin | → | ESP32-S3 |
-|----------|---|----------|
-| GND | → | GND |
-| VCC | → | 3V3 |
-| SCL | → | **GPIO 18** |
-| SDA | → | **GPIO 17** |
-
-This is the **firmware default** for `smart-learn-board`.
-
-> Previous docs listed GPIO 8/9 — that was for a custom PCB layout.  
-> DevKit users should use **GPIO 17 (SDA)** and **GPIO 18 (SCL)**.
+| Board | Role | Peripherals |
+|-------|------|-------------|
+| **ESP32-S3 Mini** | Voice module | Built-in mic, amp, speaker |
+| **Arduino UNO Q** | Main board | RC522 + OLED (wired to UNO Q) |
 
 ---
 
-## ESP32-S3 ↔ SH1106 (128×64 OLED, I2C)
+## Optional: ESP32-S3 DevKit only (not Mini)
 
-| SH1106 pin | Connect to | ESP32-S3 GPIO | Notes |
-|------------|------------|---------------|-------|
-| VCC | 3.3 V | 3.3 V | |
-| GND | GND | GND | |
-| SDA | SDA | **GPIO 17** | I2C data |
-| SCL | SCL | **GPIO 18** | I2C clock |
+> **Skip this section if you use ESP32-S3 Mini.**  
+> The GPIO tables below are for an **ESP32-S3 DevKit / WROOM breadboard** build with external modules. They are **not** required for the Smart Learn ESP32-S3 Mini setup.
 
-Default I2C address: **0x3C** (`CONFIG_BOARD_OLED_I2C_ADDR`).
+Default GPIOs come from `components/bsp-custom/Kconfig.projbuild`. Use **3.3 V** logic and a common **GND**.
 
-Some modules label pins **D0 = SCL**, **D1 = SDA** — match SDA→GPIO8, SCL→GPIO9.
+### External I2S mic (INMP441) — DevKit only
 
----
+| INMP441 | ESP32-S3 GPIO |
+|---------|---------------|
+| VDD | 3.3 V |
+| GND | GND |
+| SCK | GPIO 4 |
+| WS | GPIO 5 |
+| SD | GPIO 6 |
+| L/R | GND (left) |
 
-## ESP32-S3 ↔ RC522 (13.56 MHz RFID, SPI)
+### External I2S amp (MAX98357A) — DevKit only
 
-| RC522 pin | Connect to | ESP32-S3 GPIO | Notes |
-|-----------|------------|---------------|-------|
-| 3.3 V | 3.3 V | 3.3 V | **Do not use 5 V** |
-| GND | GND | GND | |
-| SDA | CS / NSS | **GPIO 10** | Chip select |
-| SCK | SCK | **GPIO 12** | SPI clock |
-| MOSI | MOSI | **GPIO 11** | Master out |
-| MISO | MISO | **GPIO 13** | Master in |
-| RST | Reset | **GPIO 14** | Reset |
-| IRQ | — | *(not used)* | Leave unconnected |
+| MAX98357A | ESP32-S3 GPIO |
+|-----------|---------------|
+| VIN | 3.3 V or 5 V |
+| GND | GND |
+| BCLK | GPIO 15 |
+| LRC | GPIO 16 |
+| DIN | GPIO 7 |
+| SD | 3.3 V (enable) |
 
-SPI bus: **SPI2_HOST** (default).
+### External OLED / RC522 — DevKit only
 
----
+In the Smart Learn product setup, use **UNO Q** for these instead. DevKit GPIO defaults (legacy):
 
-## Quick reference (signal → GPIO)
+| Module | Signal | GPIO |
+|--------|--------|------|
+| OLED (I2C) | SDA / SCL | 17 / 18 |
+| RC522 (SPI) | CS / MOSI / SCK / MISO / RST | 10 / 11 / 12 / 13 / 14 |
 
-| Component | Signal | GPIO |
-|-----------|--------|------|
-| INMP441 | BCLK | 4 |
-| INMP441 | WS | 5 |
-| INMP441 | DOUT | 6 |
-| MAX98357A | BCLK | 15 |
-| MAX98357A | LRC | 16 |
-| MAX98357A | DIN | 7 |
-| SH1106 | SDA | 17 |
-| SH1106 | SCL | 18 |
-| RC522 | CS | 10 |
-| RC522 | MOSI | 11 |
-| RC522 | SCK | 12 |
-| RC522 | MISO | 13 |
-| RC522 | RST | 14 |
-
----
-
-## WiFi status on OLED
-
-There is **no separate WiFi LED** on this board. WiFi status is shown on the **SH1106 OLED** title/status line:
-
-| OLED text | Meaning |
-|-----------|---------|
-| `Connecting WiFi...` | Connecting (dots animate) |
-| `WiFi connected` | Connected — then shows `Say 'Hi Json' to ask` |
-| `WiFi failed` | Could not connect after retries |
-| `Say 'Hi Json' to ask` | Ready for voice |
-
-Change GPIO pins in:
+Change pins via:
 
 ```bash
 idf.py menuconfig
@@ -124,9 +81,8 @@ idf.py menuconfig
 
 ---
 
-## Power & notes
+## Related docs
 
-- Use a stable **3.3 V** supply for ESP32-S3; INMP441 and RC522 are 3.3 V only.
-- MAX98357A can use 3.3 V or 5 V on VIN depending on your module.
-- Keep I2S mic and speaker **BCLK/WS lines separate** (different GPIO sets — do not tie together).
-- Add **100 nF** decoupling caps near each module VCC if the board is noisy.
+- [SETUP.md](./SETUP.md) — NVS, flash, voice flow (ESP32-S3 Mini)
+- [README.md](./README.md) — voice firmware overview
+- [UNO Q wiring](../../smart-learn-uno-q/README.md) — RC522 + OLED

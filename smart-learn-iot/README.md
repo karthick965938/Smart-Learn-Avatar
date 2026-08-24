@@ -3,11 +3,11 @@
 [![ESP-IDF](https://img.shields.io/badge/ESP--IDF-v5.3+-E7352C?style=for-the-badge&logo=espressif&logoColor=white)](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/index.html)
 [![Hardware](https://img.shields.io/badge/Voice-ESP32--S3--Mini-blue?style=for-the-badge&logo=espressif)](https://www.espressif.com/en/products/socs/esp32-s3)
 
-**Smart Learn IoT** is the **voice firmware** for Smart Learn. It runs on **ESP32-S3 Mini** with built-in microphone and amplifier, external speaker, WiFi, wake word **"Hi Json"**, and RAG-powered answers via the [Smart Learn API](../smart-learn-api/README.md).
+**Smart Learn IoT** is the **voice firmware** for Smart Learn. It runs on **ESP32-S3 Mini** with **built-in microphone, amplifier, and speaker**, WiFi, wake word **"Hi Json"**, and RAG answers via the [Smart Learn API](../smart-learn-api/README.md).
 
-Pair with **[Arduino UNO Q](../smart-learn-uno-q/README.md)** (main board) for **RC522** RFID and **OLED** display, managed through [Smart Learn Web](../smart-learn-web/README.md).
+**No mic / amp / speaker wiring on the Mini** — those are on-board. Pair with **[Arduino UNO Q](../smart-learn-uno-q/README.md)** for **RC522** RFID and **OLED**, managed in [Smart Learn Web](../smart-learn-web/README.md).
 
-[![Video Demo](https://img.shields.io/badge/Demo-Voice%20%2B%20RFID-blue?style=for-the-badge&logo=youtube)](https://www.youtube.com/watch?v=sbAEzvDquOA)
+[![Video Demo](https://img.shields.io/badge/Demo-Smart%20Learn-blue?style=for-the-badge&logo=youtube)](https://youtu.be/VB4N3pkbW_0)
 
 ---
 
@@ -16,19 +16,19 @@ Pair with **[Arduino UNO Q](../smart-learn-uno-q/README.md)** (main board) for *
 | Board | Role | Highlights |
 |-------|------|------------|
 | **[Arduino UNO Q](../smart-learn-uno-q/README.md)** | Main board | RC522 RFID, OLED display, Smart Learn Web integration |
-| **ESP32-S3 Mini** | Voice module | **Hi Json**, STT/TTS, built-in mic & amplifier, WiFi |
+| **ESP32-S3 Mini** | Voice module | **Hi Json**, STT/TTS, **built-in** mic · amp · speaker, WiFi |
 
-Card → KB mappings are managed in [Smart Learn Web](../smart-learn-web/README.md) **IoT Setup** (used with the UNO Q).
+Card → KB mappings: [Smart Learn Web](../smart-learn-web/README.md) **IoT Setup** (UNO Q scans).
 
 ---
 
 ## 🚀 Key Features (ESP32-S3 Mini)
 
-- **🎙️ Hands-free speech** — Wake word **"Hi Json"**, OpenAI Whisper STT, KB query, OpenAI TTS
-- **🔊 Built-in audio** — On-board microphone and amplifier with external speaker
-- **📚 RAG integration** — `POST /api/v1/kb/{kb_id}/query` using the KB URL from NVS
+- **🎙️ Hands-free speech** — Wake word **"Hi Json"**, Whisper STT, KB query, OpenAI TTS
+- **🔊 Built-in audio** — On-board microphone, amplifier, and speaker (no external audio modules)
+- **📚 RAG integration** — `POST /api/v1/kb/{kb_id}/query` using `KB_url` from NVS
 - **🔐 NVS provisioning** — WiFi, OpenAI key, and `KB_url` stored once at flash time
-- **🤝 Works with UNO Q** — RFID and OLED on the Arduino UNO Q main board + Smart Learn Web
+- **🤝 Works with UNO Q** — RFID and OLED on the Arduino UNO Q + Smart Learn Web
 
 ---
 
@@ -50,7 +50,7 @@ Card → KB mappings are managed in [Smart Learn Web](../smart-learn-web/README.
     ┌──────────┴──────────┐        ┌─────────┴──────────┐
     │  Arduino UNO Q      │        │  ESP32-S3 Mini     │
     │  MAIN BOARD         │        │  VOICE MODULE      │
-    │  RC522 + OLED       │        │  mic + speaker     │
+    │  RC522 + OLED       │        │  built-in audio    │
     │  (smart-learn-uno-q)│        │  (smart-learn-board)│
     └─────────────────────┘        └────────────────────┘
 ```
@@ -58,16 +58,14 @@ Card → KB mappings are managed in [Smart Learn Web](../smart-learn-web/README.
 **Arduino UNO Q (RFID + OLED):**
 
 1. Tap card → RC522 reads UID → Python posts `POST /api/v1/iot/rfid/scan`.
-2. OLED: **Scanning RFID…** → **Knowledge Base Selected:** + name (if assigned).
-3. **Smart Learn Web** gets the scan event → assign KB in **IoT Setup** or popup → chat for assigned cards.
+2. OLED shows scan status and selected knowledge base.
+3. **Smart Learn Web** → assign KB in **IoT Setup** or popup.
 
-**ESP32-S3 Mini (voice module):**
+**ESP32-S3 Mini (voice):**
 
-1. Connect WiFi; use `KB_url` from NVS as the query endpoint.
-2. Say **"Hi Json"** → STT → KB query → TTS on the speaker.
-3. Works alongside UNO Q + Smart Learn Web for RFID-driven KB selection on the main display.
-
-Set ESP32 `KB_url` in NVS to the knowledge base you want for voice (match the KB assigned to your RFID card on the UNO Q).
+1. USB power → flash firmware + NVS (no audio wiring).
+2. Say **"Hi Json"** → STT → KB query → TTS on built-in speaker.
+3. Set `KB_url` in NVS to the knowledge base you want for voice.
 
 ---
 
@@ -75,38 +73,7 @@ Set ESP32 `KB_url` in NVS to the knowledge base you want for voice (match the KB
 
 ### Arduino UNO Q — main board (RC522 + OLED)
 
-Project: [`../smart-learn-uno-q/`](../smart-learn-uno-q/)
-
-**RC522 (SPI)** — use **3.3 V** power:
-
-| RC522 | UNO Q |
-|-------|-------|
-| VCC | `3.3V` |
-| GND | `GND` |
-| RST | **D9** |
-| SDA / CS | **D10** |
-| MOSI | **D11** |
-| MISO | **D12** |
-| SCK | **D13** |
-
-**0.96" OLED SSD1306 (I2C)** — address `0x3C`:
-
-| OLED | UNO Q |
-|------|-------|
-| VCC | `3.3V` |
-| GND | `GND` |
-| SDA | **SDA** |
-| SCL | **SCL** |
-
-Works with **[Smart Learn Web](../smart-learn-web/README.md)** for card registration and KB assignment.
-
-```text
-Tap card → UNO Q → API → Web (IoT Setup) → assign KB → OLED shows selected KB
-```
-
-Full wiring: [`smart-learn-uno-q/README.md`](../smart-learn-uno-q/README.md)
-
----
+Full pin tables: [`smart-learn-uno-q/README.md`](../smart-learn-uno-q/README.md)
 
 ### ESP32-S3 Mini — voice module
 
@@ -115,9 +82,12 @@ Firmware: [`smart-learn-board/`](./smart-learn-board/)
 | Built-in | Notes |
 |----------|--------|
 | Microphone | On-board |
-| Audio amplifier | On-board + **external speaker** |
+| Audio amplifier | On-board |
+| Speaker | On-board |
 | WiFi | ESP32-S3 wireless |
-| Wake word | **Hi Json** → full speech-to-speech pipeline |
+| Wake word | **Hi Json** |
+
+**No peripheral wiring for voice.** See [WIRING.md](./smart-learn-board/WIRING.md) for Mini notes (and optional DevKit-only GPIO tables).
 
 ---
 
@@ -125,9 +95,9 @@ Firmware: [`smart-learn-board/`](./smart-learn-board/)
 
 ### Prerequisites
 
-1. **ESP-IDF v5.3+** — [Installation guide](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/get-started/index.html)
-2. **Smart Learn API** running ([setup](../smart-learn-api/README.md))
-3. **Arduino UNO Q** deployed for RFID ([`smart-learn-uno-q`](../smart-learn-uno-q/README.md))
+1. **ESP-IDF v5.3+**
+2. **Smart Learn API** running
+3. **Arduino UNO Q** for RFID (optional for voice-only testing)
 
 ### Build and flash
 
@@ -162,13 +132,12 @@ Flash `nvs.bin` at `0x9000`, then flash the main firmware.
 
 ## 🕹️ End-to-End Usage
 
-1. Start **Smart Learn API** and **Smart Learn Web** on your PC.
-2. Deploy **Arduino UNO Q** with **RC522** + **OLED** ([`smart-learn-uno-q`](../smart-learn-uno-q/)).
-3. Flash **ESP32-S3 Mini** voice firmware + NVS; connect external speaker for **Hi Json** voice Q&A.
-4. Create knowledge bases and upload documents in the web dashboard.
-5. Tap a card on the **UNO Q** → assign KB in **IoT Setup** or the scan popup.
-6. UNO Q OLED shows **Knowledge Base Selected**; web chat opens for assigned cards.
-7. Say **"Hi Json"** on the **ESP32** to ask questions (uses `KB_url` from NVS).
+1. Start **Smart Learn API** and **Smart Learn Web**.
+2. Deploy **Arduino UNO Q** with **RC522** + **OLED**.
+3. Flash **ESP32-S3 Mini** + NVS (USB only — built-in audio).
+4. Create knowledge bases in the web dashboard.
+5. Tap a card on the **UNO Q** → assign KB in **IoT Setup**.
+6. Say **"Hi Json"** on the **Mini** to ask questions (`KB_url` in NVS).
 
 ---
 
@@ -177,10 +146,11 @@ Flash `nvs.bin` at `0x9000`, then flash the main firmware.
 ```text
 smart-learn-iot/
 ├── smart-learn-board/     # ESP32-S3 Mini voice firmware
-│   ├── main/app/          # STT, TTS, WiFi voice pipeline
-│   └── SETUP.md
+│   ├── SETUP.md           # NVS + flash
+│   ├── WIRING.md          # Mini: no wiring; DevKit optional
+│   └── main/app/          # STT, TTS, WiFi voice pipeline
 ├── components/bsp-custom/
-└── ../smart-learn-uno-q/  # Arduino UNO Q — main board (RC522 + OLED)
+└── ../smart-learn-uno-q/  # Arduino UNO Q — RC522 + OLED
 ```
 
 ---

@@ -1,30 +1,32 @@
 # Smart Learn Board — Setup Guide
 
-One-time device configuration and speech-to-speech flow for the **ESP32-S3 + RC522** board firmware (`smart-learn-board`).
+One-time configuration and speech-to-speech flow for **ESP32-S3 Mini** voice firmware (`smart-learn-board`).
+
+**Board:** ESP32-S3 Mini with **built-in microphone, amplifier, and speaker** — no external audio wiring.  
+**RFID / OLED:** use **[Arduino UNO Q](../../smart-learn-uno-q/README.md)**, not the ESP32.
+
+Hardware notes: [WIRING.md](./WIRING.md)
 
 ---
 
-## Speech-to-Speech Flow
+## Speech-to-Speech Flow (ESP32-S3 Mini)
 
 ```text
 1. Boot → read WiFi / OpenAI / default KB URL from NVS
 2. Connect WiFi
 3. Wait for wake word "Hi Json"
-4. Record speech → OpenAI Whisper (STT)
-5. POST question to active Knowledge Base URL
-6. OpenAI TTS (tts-1) → speaker playback
-7. Show question + answer on OLED
+4. Record speech (built-in mic) → OpenAI Whisper (STT)
+5. POST question to Knowledge Base URL from NVS
+6. OpenAI TTS (tts-1) → built-in speaker
 ```
 
-**RFID card tap (runtime):**
+**RFID / KB selection** happens on the **Arduino UNO Q** + **Smart Learn Web** (not on the Mini):
 
 ```text
-1. RC522 reads card UID
-2. Device POSTs /api/v1/iot/rfid/scan { "uid": "..." }
-3. API returns { assigned, kb_id, kb_name, kb_url }
-4. If assigned  → switch active KB URL for voice queries
-5. If unassigned → keep default KB URL from NVS
-6. Web dashboard shows popup to assign a Knowledge Base
+1. Tap card on UNO Q RC522
+2. UNO Q POSTs /api/v1/iot/rfid/scan
+3. Assign KB in Smart Learn Web (IoT Setup / popup)
+4. Set ESP32 NVS KB_url to the same knowledge base for voice
 ```
 
 ---
@@ -42,8 +44,7 @@ These values are written **once** to the NVS partition (`0x9000`, namespace `con
 | **Default Knowledge Base URL** | `KB_url` | `http://172.22.200.239:5000/api/v1/kb/{kb_id}/query` |
 | TTS voice (optional) | `tts_voice` | `nova` |
 
-> **Default KB URL** is used at boot and when an unassigned RFID card is scanned.  
-> **Assigned RFID cards** override the active KB URL dynamically via the API — no reflash needed.
+> **`KB_url`** is the knowledge base the Mini uses for voice answers. Align it with the KB you assign to RFID cards on the UNO Q.
 
 ---
 
@@ -57,27 +58,21 @@ idf.py set-target esp32s3
 idf.py menuconfig
 ```
 
-Under **Example Configuration**, set (defaults are pre-filled — verify and update **Knowledge Base URL** with your KB id):
+Under **Example Configuration**, set (verify and update **Knowledge Base URL** with your KB id):
 
-| menuconfig field | Default value | Maps to NVS key |
-|------------------|---------------|-----------------|
-| WiFi SSID | `FTTH-F8D0` | `ssid` |
-| WiFi Password | `12345678` | `password` |
-| OpenAI Key | *(pre-filled)* | `ChatGPT_key` |
-| Base URL | `https://api.openai.com/v1/` | `Base_url` |
-| Knowledge Base URL | `http://172.22.200.239:5000/api/v1/kb/xxxxxxxx/query` | `KB_url` |
-| TTS Voice Selection | `shimmer` | `tts_voice` |
+| menuconfig field | Maps to NVS key |
+|------------------|-----------------|
+| WiFi SSID | `ssid` |
+| WiFi Password | `password` |
+| OpenAI Key | `ChatGPT_key` |
+| Base URL | `Base_url` |
+| Knowledge Base URL | `KB_url` |
+| TTS Voice Selection | `tts_voice` |
 
 **Knowledge Base URL format:**
 
 ```text
-http://<your-pc-ip>:8000/api/v1/kb/<kb_id>/query
-```
-
-Example:
-
-```text
-http://172.22.200.239:5000/api/v1/kb/a1b2c3d4/query
+http://<your-pc-ip>:5000/api/v1/kb/<kb_id>/query
 ```
 
 Get `<kb_id>` from the web dashboard or `GET /api/v1/kbs`.
@@ -100,11 +95,11 @@ The build copies `factory_nvs.bin` into the firmware image automatically.
 
 ### Step 4 — Edit via USB (optional)
 
-On first boot without valid NVS, the device enters UF2 mode. Connect USB and edit **CONFIG.INI** on the `ESP-Box` drive:
+On first boot without valid NVS, the device may enter UF2 mode. Connect USB and edit **CONFIG.INI** on the drive:
 
 ```ini
-ssid=FTTH-F8D0
-password=12345678
+ssid=YourWiFi
+password=your-password
 ChatGPT_key=sk-your-openai-key
 Base_url=https://api.openai.com/v1/
 KB_url=http://172.22.200.239:5000/api/v1/kb/a1b2c3d4/query
@@ -117,14 +112,12 @@ Save and reboot.
 
 ## Setup Method B — API NVS generator
 
-Generate a 16 KB NVS binary from the Smart Learn API:
-
 ```bash
 curl -X POST http://172.22.200.239:5000/api/v1/iot/generate-nvs \
   -H "Content-Type: application/json" \
   -d '{
-    "ssid": "FTTH-F8D0",
-    "password": "12345678",
+    "ssid": "YourWiFi",
+    "password": "your-password",
     "openai_key": "sk-your-openai-key",
     "base_url": "https://api.openai.com/v1/",
     "kb_url": "http://172.22.200.239:5000/api/v1/kb/a1b2c3d4/query",
@@ -138,7 +131,7 @@ Flash `nvs.bin` at partition offset `0x9000`.
 
 ---
 
-## API + RFID Setup
+## API + RFID (via UNO Q)
 
 ### 1. Start the API
 
@@ -153,10 +146,8 @@ OPENAI_API_KEY=sk-your-key
 API_BASE_URL=http://172.22.200.239:5000
 ```
 
-> `API_BASE_URL` must match the host in your NVS `KB_url` so RFID scan responses return correct `kb_url` values.
-
 ```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8000
+uvicorn app.main:app --host 0.0.0.0 --port 5000
 ```
 
 ### 2. Create a Knowledge Base
@@ -167,68 +158,28 @@ curl -X POST http://172.22.200.239:5000/api/v1/kbs \
   -d '{"name": "My KB"}'
 ```
 
-Use the returned `id` in your NVS `KB_url`.
+Use the returned `id` in your ESP32 NVS `KB_url`.
 
-### 3. Assign RFID cards (web dashboard)
+### 3. Assign RFID cards (UNO Q + web)
 
-1. Open the Smart Learn web dashboard
-2. Scan an RFID card on the device
-3. A popup appears — assign a Knowledge Base
-4. Next scan switches the device to that KB automatically
-
-Or via API:
-
-```bash
-curl -X POST http://172.22.200.239:5000/api/v1/iot/rfid/cards \
-  -H "Content-Type: application/json" \
-  -d '{"uid": "12344", "kb_id": "a1b2c3d4"}'
-```
-
-### 4. Verify RFID scan from device
-
-When a card is tapped, the device calls:
-
-```bash
-POST /api/v1/iot/rfid/scan
-{ "uid": "12344" }
-```
-
-Response (assigned):
-
-```json
-{
-  "id": 1,
-  "uid": "12344",
-  "assigned": true,
-  "kb_id": "a1b2c3d4",
-  "kb_name": "My KB",
-  "kb_url": "http://172.22.200.239:5000/api/v1/kb/a1b2c3d4/query",
-  "timestamp": 1787071700
-}
-```
-
-The firmware updates the active KB URL from `kb_url` in this response.
+1. Open **Smart Learn Web**
+2. Tap a card on the **Arduino UNO Q**
+3. Assign a Knowledge Base in the popup / **IoT Setup**
+4. Keep ESP32 `KB_url` pointed at the KB you want for voice
 
 ---
 
 ## Testing Speech-to-Speech
 
-1. Ensure API is running and reachable from the device over WiFi
-2. Ensure default `KB_url` in NVS points to a valid KB with documents
-3. Flash firmware and open serial monitor:
+1. API reachable from the Mini over WiFi  
+2. `KB_url` in NVS points to a KB with documents  
+3. Flash and monitor:
 
 ```bash
 idf.py monitor
 ```
 
-4. Say **"Hi Json"**, then ask a question
-5. Watch serial logs:
-
-```text
-I (xxx) settings: Default KB URL: http://...
-I (xxx) app_rfid: RFID scan API HTTP 200
-I (xxx) settings: Active KB switched to My KB (http://...)
-```
+4. Say **"Hi Json"**, then ask a question  
 
 ---
 
@@ -239,9 +190,8 @@ I (xxx) settings: Active KB switched to My KB (http://...)
 | WiFi SSID / Password | NVS (one-time) | No |
 | OpenAI API Key | NVS (one-time) | No |
 | OpenAI Base URL | NVS (one-time) | No |
-| Default KB URL | NVS (one-time) | No (fallback only) |
-| Active KB URL | API via RFID scan | **Yes — per card tap** |
-| RFID card → KB map | Web dashboard / API | **Yes — no reflash** |
+| Voice KB URL | NVS (`KB_url`) | Reflash / re-provision NVS to change |
+| RFID card → KB map | Web + UNO Q | Yes — no ESP32 reflash |
 
 ---
 
@@ -250,10 +200,10 @@ I (xxx) settings: Active KB switched to My KB (http://...)
 | Problem | Check |
 |---------|-------|
 | Device reboots to UF2 | NVS keys missing — run factory_nvs setup |
-| STT fails | `ChatGPT_key` and `Base_url` in NVS |
-| KB query fails | `KB_url` reachable from device; API running |
-| RFID doesn't switch KB | Card assigned in web? API `API_BASE_URL` matches NVS host? |
-| RFID scan HTTP fails | Device on same network as API; `KB_url` uses LAN IP not `localhost` |
+| STT fails | `ChatGPT_key` and `Base_url` in NVS; built-in mic unobstructed |
+| No TTS audio | Built-in speaker path; volume / power |
+| KB query fails | `KB_url` reachable from device; API running; use LAN IP not `localhost` |
+| RFID / OLED | Wire and use **UNO Q**, not the Mini — see [UNO Q README](../../smart-learn-uno-q/README.md) |
 
 ---
 
@@ -262,10 +212,9 @@ I (xxx) settings: Active KB switched to My KB (http://...)
 | File | Purpose |
 |------|---------|
 | `main/main.c` | STT → KB query → TTS pipeline |
-| `main/settings/settings.c` | NVS read + active KB URL management |
-| `main/app/app_rfid.c` | RFID scan → API → dynamic KB switch |
+| `main/settings/settings.c` | NVS read + KB URL |
 | `main/app/app_sr.c` | Wake word "Hi Json" |
-| `main/app/app_audio.c` | Record / playback |
+| `main/app/app_audio.c` | Record / playback (on-board audio) |
 | `../smart-learn/factory_nvs/` | One-time NVS provisioning |
 
-See also: [API.md](../../smart-learn-api/API.md) for full API reference.
+See also: [API.md](../../smart-learn-api/API.md)
