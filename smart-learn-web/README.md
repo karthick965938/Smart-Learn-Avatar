@@ -114,7 +114,7 @@ Configure how the assistant behaves **per knowledge base**.
 
 ### IoT Setup (RFID Cards)
 
-IoT Setup manages **RFID card registry and knowledge base mapping** for the **Arduino UNO Q main board** (RC522 + OLED). The **ESP32-S3 Mini** provides the **Hi Json** voice assistant with built-in microphone and speaker output.
+IoT Setup manages **RFID card registry and knowledge base mapping** for the **Arduino UNO Q main board** (RC522 + OLED). The **ESP32-S3 Mini** provides the **Hi Json** voice assistant with **built-in** microphone, amplifier, and speaker (no audio wiring).
 
 1. Run **Smart Learn API** and open this web app.
 2. Click **IoT Setup** in the header.
@@ -129,7 +129,7 @@ The panel shows **RC522 (SPI)** and **0.96" SSD1306 OLED (I2C)** wiring for the 
 | Board | Project | Highlights |
 |-------|---------|------------|
 | **Arduino UNO Q** (main) | `smart-learn-uno-q` | RC522 RFID, OLED display, web integration |
-| **ESP32-S3 Mini** (voice) | `smart-learn-iot/smart-learn-board` | **Hi Json**, STT/TTS, built-in mic & amplifier |
+| **ESP32-S3 Mini** (voice) | `smart-learn-iot/smart-learn-board` | **Hi Json**, STT/TTS, built-in mic · amp · speaker |
 
 ---
 
